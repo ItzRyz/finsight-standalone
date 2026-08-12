@@ -1,0 +1,342 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/**
+ * =========================================================
+ * ENUMS
+ * =========================================================
+ */
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ExpenseType {
+  EXPENSE
+  INCOME
+}
+
+enum CategoryType {
+  SYSTEM
+  CUSTOM
+}
+
+enum CategorizationSource {
+  MANUAL
+  AI
+}
+
+enum BudgetPeriod {
+  MONTHLY
+  YEARLY
+}
+
+enum BudgetAlertType {
+  WARNING
+  EXCEEDED
+}
+
+enum NotificationType {
+  BUDGET_WARNING
+  BUDGET_EXCEEDED
+  EXPENSE_CATEGORIZED
+  SYSTEM
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum AiCategorizationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+/**
+ * =========================================================
+ * USER
+ * =========================================================
+ */
+
+model User {
+  id        String  @id // Same UUID as Supabase auth.users.id
+  email     String  @unique
+  name      String?
+  avatarUrl String?
+
+  role     UserRole @default(USER)
+  isActive Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expenses          Expense[]
+  budgets           Budget[]
+  categories        Category[]
+  notifications     Notification[]
+  aiCategorizations AiCategorization[]
+  budgetAlerts      BudgetAlert[]
+
+  @@index([role])
+  @@index([createdAt])
+  @@map("users")
+}
+
+/**
+ * =========================================================
+ * CATEGORY
+ * =========================================================
+ */
+
+model Category {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  icon        String?
+  color       String?
+
+  type CategoryType @default(SYSTEM)
+
+  // Null = system-wide category
+  // Non-null = category created by a specific user
+  userId String?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expenses          Expense[]
+  budgets           Budget[]
+  aiCategorizations AiCategorization[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([type])
+  @@map("categories")
+}
+
+/**
+ * =========================================================
+ * EXPENSE
+ * =========================================================
+ */
+
+model Expense {
+  id String @id @default(uuid())
+
+  userId     String
+  categoryId String?
+
+  title       String
+  description String?
+
+  amount Decimal     @db.Decimal(15, 2)
+  type   ExpenseType @default(EXPENSE)
+
+  expenseDate DateTime
+
+  // Where the transaction happened
+  merchant String?
+  location String?
+
+  // How category was determined
+  categorizationSource CategorizationSource @default(MANUAL)
+
+  // Optional receipt/image URL
+  receiptUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  aiCategorizations AiCategorization[]
+
+  @@index([userId])
+  @@index([userId, expenseDate])
+  @@index([categoryId])
+  @@index([type])
+  @@index([expenseDate])
+  @@map("expenses")
+}
+
+/**
+ * =========================================================
+ * AI EXPENSE CATEGORIZATION
+ * =========================================================
+ */
+
+model AiCategorization {
+  id String @id @default(uuid())
+
+  expenseId  String
+  userId     String
+  categoryId String?
+
+  status AiCategorizationStatus @default(PENDING)
+
+  // AI output
+  confidence Decimal? @db.Decimal(5, 4)
+
+  // AI provider/model information
+  provider String?
+  model    String?
+
+  // Original AI response
+  rawResponse Json?
+
+  // Human correction
+  wasAccepted  Boolean @default(false)
+  wasCorrected Boolean @default(false)
+
+  processingTimeMs Int?
+
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expense  Expense   @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([expenseId])
+  @@index([userId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ai_categorizations")
+}
+
+/**
+ * =========================================================
+ * BUDGET
+ * =========================================================
+ */
+
+model Budget {
+  id String @id @default(uuid())
+
+  userId     String
+  categoryId String?
+
+  name String?
+
+  amount Decimal @db.Decimal(15, 2)
+
+  period BudgetPeriod @default(MONTHLY)
+
+  // For monthly budget:
+  // 2026-08-01 -> August 2026
+  periodStart DateTime
+  periodEnd   DateTime
+
+  // Percentage at which warning is triggered
+  warningThreshold Decimal @default(80) @db.Decimal(5, 2)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  alerts BudgetAlert[]
+
+  @@index([userId])
+  @@index([userId, periodStart, periodEnd])
+  @@index([categoryId])
+  @@index([isActive])
+  @@map("budgets")
+}
+
+/**
+ * =========================================================
+ * BUDGET ALERT
+ * =========================================================
+ */
+
+model BudgetAlert {
+  id String @id @default(uuid())
+
+  budgetId String
+  userId   String
+
+  type BudgetAlertType
+
+  spentAmount  Decimal @db.Decimal(15, 2)
+  budgetAmount Decimal @db.Decimal(15, 2)
+  percentage   Decimal @db.Decimal(7, 2)
+
+  message String
+
+  notified Boolean @default(false)
+
+  resolvedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([budgetId])
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([type])
+  @@index([resolvedAt])
+  @@map("budget_alerts")
+}
+
+/**
+ * =========================================================
+ * NOTIFICATION
+ * =========================================================
+ */
+
+model Notification {
+  id String @id @default(uuid())
+
+  userId String
+
+  type     NotificationType
+  priority NotificationPriority @default(NORMAL)
+
+  title   String
+  message String
+
+  // Optional related resource
+  expenseId String?
+  budgetId  String?
+  alertId   String?
+
+  // Frontend notification state
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@index([type])
+  @@map("notifications")
+}
