@@ -53,8 +53,12 @@ export async function updateSession(request: NextRequest) {
    */
   const isProtectedRoute =
     pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/expenses") ||
+    pathname.startsWith("/budgets") ||
+    pathname.startsWith("/notifications") ||
     pathname.startsWith("/settings") ||
-    pathname.startsWith("/profile");
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/admin");
 
   /*
    * User is not authenticated

@@ -12,6 +12,23 @@ import {
 import { getZodErrors } from "@/lib/validators/utils";
 import { ActionResult } from "@/types/action";
 
+export async function updateProfile(name: string) {
+  const { dbUser } = await import("@/lib/auth/get-current-user").then((module) => module.getCurrentUser());
+  const normalizedName = name.trim();
+
+  if (normalizedName.length < 2 || normalizedName.length > 100) {
+    return { success: false, error: "Nama harus terdiri dari 2-100 karakter." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ data: { name: normalizedName } });
+
+  if (error) return { success: false, error: error.message };
+
+  await prisma.user.update({ where: { id: dbUser.id }, data: { name: normalizedName } });
+  return { success: true };
+}
+
 export async function signUp(
   formData: FormData,
 ): Promise<ActionResult<{ requiresConfirmation: boolean }>> {
@@ -111,7 +128,7 @@ export async function signOut() {
 
   await supabase.auth.signOut();
 
-  redirect("/login");
+  redirect("/auth");
 }
 
 export async function forgotPassword(formData: FormData) {

@@ -1,25 +1,16 @@
 import { TrendingUp, LockKeyhole } from "lucide-react";
-import Link from "next/link";
 import { Separator } from "../ui/separator";
 import type { ReactNode } from "react";
 import { Button } from "../ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { SignInForm } from "./signin-form";
-import { SignUpForm } from "./signup-form";
 
 type AuthShellProps = {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   children: ReactNode;
   footer?: ReactNode;
 };
 
-export function AuthShell({
-  title,
-  description,
-  children,
-  footer,
-}: AuthShellProps) {
+export function AuthShell({ children }: AuthShellProps) {
   return (
     <div className="min-h-svh">
       <div className="flex min-h-svh flex-col lg:flex-row">

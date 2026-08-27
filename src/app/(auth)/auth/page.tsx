@@ -14,7 +14,7 @@ export default function SignInPage() {
         <>
           Don&apos;t have an account?{" "}
           <Link
-            href="/register"
+            href="/auth"
             className="font-medium text-primary hover:underline"
           >
             Create an account

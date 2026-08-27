@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Controller, useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "@/actions/auth";
+import Link from "next/link";
 import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -133,6 +134,10 @@ export function SignInForm() {
 
         {isSubmitting ? "Signing in..." : "Sign in"}
       </Button>
+
+      <Link href="/password/forgot" className="block text-center text-sm text-primary hover:underline">
+        Forgot password?
+      </Link>
 
       {/* ================= REGISTER ================= */}
 
