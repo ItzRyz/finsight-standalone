@@ -12,17 +12,7 @@ import { getZodErrors } from "@/lib/validators/utils";
 
 import { getBudgetPeriod } from "@/lib/budget/get-budget-period";
 import { reconcileBudgetAlerts } from "@/lib/budget/reconcile-budget-alerts";
-
-type ActionResult<T = undefined> =
-  | {
-      success: true;
-      data: T;
-    }
-  | {
-      success: false;
-      error?: string;
-      fieldErrors?: Record<string, string>;
-    };
+import type { ActionResult } from "@/types/action";
 
 export async function createBudget(
   formData: FormData,
@@ -273,7 +263,7 @@ export async function deleteBudget(id: string): Promise<ActionResult> {
   await prisma.budget.delete({ where: { id: budget.id } });
   revalidatePath("/budgets");
   revalidatePath("/dashboard");
-  return { success: true, data: undefined };
+  return { success: true };
 }
 
 export async function updateBudget(

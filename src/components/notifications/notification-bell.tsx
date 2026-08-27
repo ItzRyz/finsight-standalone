@@ -1,5 +1,6 @@
 "use client";
-
+// Deprecated: use NotificationMenu instead (which includes the bell + dropdown).
+// Kept for backwards-compat; not rendered in UserHeader after Phase 2 cleanup.
 import { Bell } from "lucide-react";
 
 import { useNotificationStore } from "@/stores/notification-store";

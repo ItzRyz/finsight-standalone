@@ -1,9 +1,8 @@
 "use client";
 
-import { Bell, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "../theme-toggle";
 
 import {
@@ -48,12 +47,6 @@ export function UserHeader({ title }: AppHeaderProps) {
         <NotificationMenu />
 
         <ThemeToggle />
-
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="size-4" />
-
-          <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-[#ffc400]" />
-        </Button>
       </div>
     </header>
   );

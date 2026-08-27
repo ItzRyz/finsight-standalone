@@ -49,11 +49,9 @@ export function BudgetList({ budgets, categories }: Props) {
             💰
           </div>
 
-          <h2 className="font-semibold">Belum ada budget</h2>
+          <h2 className="font-semibold">No budgets yet</h2>
 
-          <p className="mt-1 text-sm text-muted-foreground">
-            Buat budget pertama untuk mulai mengontrol pengeluaranmu.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Create your first budget to start tracking spending.</p>
         </div>
       </div>
     );

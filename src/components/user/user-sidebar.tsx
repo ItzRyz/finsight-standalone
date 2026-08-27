@@ -11,6 +11,7 @@ import {
   Tags,
   Settings,
   WalletCards,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -59,11 +60,6 @@ const mainNavigation = [
 
 const managementNavigation = [
   {
-    title: "Analytics",
-    href: "/analytics",
-    icon: ChartNoAxesCombined,
-  },
-  {
     title: "Settings",
     href: "/settings",
     icon: Settings,
@@ -74,6 +70,7 @@ type UserSidebarProps = {
   user: {
     name?: string | null;
     email?: string | null;
+    role?: string | null;
   };
 };
 
@@ -171,6 +168,20 @@ export function UserSidebar({ user }: UserSidebarProps) {
                   </SidebarMenuItem>
                 );
               })}
+              {user.role === "ADMIN" && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === "/admin" || pathname.startsWith("/admin/")}
+                    tooltip="Admin"
+                  >
+                    <Link href="/admin">
+                      <ShieldCheck />
+                      <span>Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

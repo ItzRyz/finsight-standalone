@@ -15,6 +15,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import {
   Select,
@@ -108,20 +119,13 @@ export function BudgetActions({
   }
 
   async function handleDelete() {
-    if (!window.confirm("Hapus budget ini?")) {
-      return;
-    }
-
     setIsDeleting(true);
-
     const result = await deleteBudget(id);
-
     if (!result.success) {
       setError(result.error ?? "Gagal menghapus budget.");
       setIsDeleting(false);
       return;
     }
-
     setIsDeleting(false);
   }
 
@@ -295,20 +299,33 @@ export function BudgetActions({
         </DialogContent>
       </Dialog>
 
-      <Button
-        size="icon-xs"
-        variant="ghost"
-        className="text-destructive"
-        onClick={handleDelete}
-        disabled={isDeleting}
-        aria-label="Delete budget"
-      >
-        {isDeleting ? (
-          <Loader2 className="size-3 animate-spin" />
-        ) : (
-          <Trash2 />
-        )}
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            size="icon-xs"
+            variant="ghost"
+            className="text-destructive"
+            disabled={isDeleting}
+            aria-label="Delete budget"
+          >
+            {isDeleting ? <Loader2 className="size-3 animate-spin" /> : <Trash2 />}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete budget?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this budget. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

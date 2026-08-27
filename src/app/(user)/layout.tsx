@@ -24,6 +24,7 @@ export default async function AppLayout({
         user={{
           name: dbUser.name,
           email: authUser.email,
+          role: dbUser.role,
         }}
       />
       <SidebarInset>

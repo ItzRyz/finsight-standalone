@@ -11,17 +11,7 @@ import { getZodErrors } from "@/lib/validators/utils";
 
 import { reconcileBudgetAlerts } from "@/lib/budget/reconcile-budget-alerts";
 import { classifyExpense } from "@/lib/ai/local-categorize";
-
-type ActionResult<T = undefined> =
-  | {
-      success: true;
-      data: T;
-    }
-  | {
-      success: false;
-      error?: string;
-      fieldErrors?: Record<string, string>;
-    };
+import type { ActionResult } from "@/types/action";
 
 export async function getExpenses() {
   const { dbUser } = await getCurrentUser();
@@ -397,7 +387,6 @@ export async function deleteExpense(id: string): Promise<ActionResult> {
 
     return {
       success: true,
-      data: undefined,
     };
   } catch (error) {
     console.error("deleteExpense:", error);

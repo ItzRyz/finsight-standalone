@@ -11,6 +11,8 @@ export function useIsMobile() {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
     mql.addEventListener("change", onChange)
+    // Initialize on mount so mobile state is correct on first paint.
+    onChange()
     return () => mql.removeEventListener("change", onChange)
   }, [])
 

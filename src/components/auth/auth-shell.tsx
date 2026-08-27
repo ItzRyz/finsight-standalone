@@ -1,7 +1,5 @@
 import { TrendingUp, LockKeyhole } from "lucide-react";
-import { Separator } from "../ui/separator";
 import type { ReactNode } from "react";
-import { Button } from "../ui/button";
 
 type AuthShellProps = {
   title?: string;
@@ -98,29 +96,14 @@ export function AuthShell({ children }: AuthShellProps) {
                 Masuk ke akun FinSight kamu
               </p>
             </div>
-            {/* ================= GOOGLE ================= */}
-
-            <Button
-              type="button"
-              variant="outline"
-              className="h-8 w-full rounded-[8px] bg-background text-[11px] font-medium text-[#333] shadow-none hover:bg-primary/20"
-            >
-              <GoogleIcon />
-              Google
-            </Button>
-
-            {/* ================= DIVIDER ================= */}
-
-            <div className="my-4 flex items-center gap-2">
-              <Separator className="flex-1 bg-[#c9c9c9]" />
-
-              <span className="whitespace-nowrap text-[9px] text-[#999]">
-                atau lanjutkan dengan
-              </span>
-
-              <Separator className="flex-1 bg-[#c9c9c9]" />
-            </div>
-
+            {/*
+              Google OAuth button intentionally hidden in Phase 1 — no
+              `supabase.auth.signInWithOAuth({ provider: "google" })`
+              wiring exists and the button previously had no onClick.
+              To re-enable: add a client component that calls Supabase
+              OAuth and restores the button + divider below.
+              See https://supabase.com/docs/guides/auth/social-login/auth-google
+            */}
             {children}
           </div>
         </div>
@@ -129,6 +112,8 @@ export function AuthShell({ children }: AuthShellProps) {
   );
 }
 
+// Kept for future OAuth wiring (Phase 2) — not rendered in Phase 1.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function GoogleIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">

@@ -173,7 +173,7 @@ export function SignUpForm() {
                 <Input
                   {...field}
                   id="confirmPassword"
-                  type={showPass ? "text" : "password"}
+                  type={showConfirmPass ? "text" : "password"}
                   aria-invalid={fieldState.invalid}
                   placeholder="••••••••"
                   autoComplete="off"
@@ -225,7 +225,7 @@ export function SignUpForm() {
           type="button"
           className="font-semibold text-primary hover:underline"
           onClick={() => {
-            router.push("/signin");
+            router.push("/auth");
           }}
         >
           Sign In now!

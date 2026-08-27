@@ -56,7 +56,7 @@ export function NotificationMenu() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-90 p-0">
+      <DropdownMenuContent align="end" className="w-[360px] p-0">
         <div className="flex items-center justify-between px-4 py-3">
           <DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
 
@@ -75,9 +75,9 @@ export function NotificationMenu() {
 
         <DropdownMenuSeparator />
 
-        <ScrollArea className="h-100">
+        <ScrollArea className="h-[400px]">
           {notifications.length === 0 ? (
-            <div className="flex h-62.5 items-center justify-center px-6 text-center">
+            <div className="flex h-[250px] items-center justify-center px-6 text-center">
               <div>
                 <Bell className="mx-auto mb-3 size-8 text-muted-foreground" />
 

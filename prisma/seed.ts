@@ -9,17 +9,27 @@ import {
 
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const connectionString = process.env.DIRECT_URL;
+/**
+ * Env split (Prisma 7 + Supabase):
+ * - DATABASE_URL: pooled 6543 (pgbouncer=true) — used by the Next.js app at runtime (src/lib/prisma.ts)
+ * - DIRECT_URL:   direct 5432 — used by migrations & this seed (prisma.config.ts / seed)
+ * See .env.example and prisma.config.ts
+ */
+const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
 
 if (!connectionString) {
-  throw new Error("DATABASE_URL is not defined");
+  throw new Error(
+    "DIRECT_URL is not defined (and no DATABASE_URL fallback). Set DIRECT_URL in .env — see .env.example",
+  );
 }
 
-const userId = process.env.SEED_USER_ID!;
-
-if (!userId) {
-  throw new Error("SEED_USER_ID is not defined");
+if (!process.env.SEED_USER_ID) {
+  throw new Error(
+    "SEED_USER_ID is not defined. Set it to an existing Supabase auth.users.id in .env — see .env.example (get it from Supabase Dashboard → Authentication → Users)",
+  );
 }
+
+const userId: string = process.env.SEED_USER_ID;
 
 const adapter = new PrismaPg({
   connectionString,
@@ -312,36 +322,39 @@ async function main() {
     },
   ];
 
-  for (const expense of expenses) {
-    await prisma.expense.create({
-      data: {
-        userId,
+  // Idempotent: skip if this user already has seeded expenses (avoids duplicates on re-run)
+  const existingExpenseCount = await prisma.expense.count({ where: { userId } });
+  if (existingExpenseCount > 0) {
+    console.log(`⏭️  Skipping expense seed: user already has ${existingExpenseCount} transactions`);
+  } else {
+    for (const expense of expenses) {
+      await prisma.expense.create({
+        data: {
+          userId,
 
-        categoryId: categoryMap.get(expense.category),
+          categoryId: categoryMap.get(expense.category),
 
-        title: expense.title,
+          title: expense.title,
 
-        description: expense.description,
+          description: expense.description,
 
-        amount: expense.amount,
+          amount: expense.amount,
 
-        type:
-          expense.category === "Salary"
-            ? ExpenseType.INCOME
-            : ExpenseType.EXPENSE,
+          type: expense.category === "Salary" ? ExpenseType.INCOME : ExpenseType.EXPENSE,
 
-        expenseDate: expense.expenseDate,
+          expenseDate: expense.expenseDate,
 
-        merchant: expense.merchant,
+          merchant: expense.merchant,
 
-        location: expense.location,
+          location: expense.location,
 
-        categorizationSource: CategorizationSource.MANUAL,
-      },
-    });
+          categorizationSource: CategorizationSource.MANUAL,
+        },
+      });
+    }
+
+    console.log(`💰 Created ${expenses.length} transactions`);
   }
-
-  console.log(`💰 Created ${expenses.length} transactions`);
 
   console.log("✅ Seed completed successfully!");
 }

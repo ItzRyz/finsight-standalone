@@ -10,7 +10,16 @@ import {
   resetPasswordSchema,
 } from "@/lib/validators/auth";
 import { getZodErrors } from "@/lib/validators/utils";
+import { syncUser } from "@/lib/auth/sync-user";
 import { ActionResult } from "@/types/action";
+
+function getAppUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL ??
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    "http://localhost:3000"
+  );
+}
 
 export async function updateProfile(name: string) {
   const { dbUser } = await import("@/lib/auth/get-current-user").then((module) => module.getCurrentUser());
@@ -60,7 +69,7 @@ export async function signUp(
       data: {
         name,
       },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      emailRedirectTo: `${getAppUrl()}/auth/callback`,
     },
   });
 
@@ -78,12 +87,10 @@ export async function signUp(
     };
   }
 
-  await prisma.user.create({
-    data: {
-      id: user.id,
-      email: user.email!,
-      name,
-    },
+  await syncUser({
+    id: user.id,
+    email: user.email!,
+    name,
   });
 
   return {
@@ -148,7 +155,7 @@ export async function forgotPassword(formData: FormData) {
   const supabase = await createClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/password/reset`,
+    redirectTo: `${getAppUrl()}/password/reset`,
   });
 
   if (error) {

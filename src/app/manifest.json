@@ -1,22 +1,24 @@
 {
-    "name": "My Awesome PWA app",
-    "short_name": "PWA App",
+    "name": "FinSight",
+    "short_name": "FinSight",
+    "description": "AI-powered financial solution — track expenses, budgets, and real-time alerts.",
     "icons": [
         {
-            "src": "/icons/android-chrome-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "maskable"
+            "src": "/favicon.ico",
+            "sizes": "48x48",
+            "type": "image/x-icon"
         },
         {
-            "src": "/icons/icon-512x512.png",
-            "sizes": "512x512",
-            "type": "image/png"
+            "src": "/file.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
         }
     ],
-    "theme_color": "#FFFFFF",
-    "background_color": "#FFFFFF",
-    "start_url": "/",
+    "theme_color": "#ffc400",
+    "background_color": "#eef0f3",
+    "start_url": "/dashboard",
     "display": "standalone",
-    "orientation": "portrait"
+    "orientation": "portrait",
+    "categories": ["finance", "productivity"]
 }
