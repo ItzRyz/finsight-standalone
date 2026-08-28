@@ -57,23 +57,23 @@ export function SignUpForm() {
   if (registeredEmail) {
     return (
       <div className="space-y-5 text-center">
-        <div className="mx-auto flex size-11 items-center justify-center rounded-full bg-[#ffc400]/10">
+        <div className="mx-auto flex size-11 items-center justify-center rounded-full bg-primary/10">
           <Mail className="size-5 text-primary" />
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold text">Check your mail!</h3>
+          <h3 className="text-sm font-semibold">Check your mail!</h3>
 
-          <p className="text-[10px] leading-relaxed text-[#777]">
+          <p className="text-xs leading-relaxed text-muted-foreground">
             We have send an email verification message to your mail:
           </p>
 
-          <p className="break-all text-[11px] font-semibold text-[#333]">
+          <p className="break-all text-xs font-semibold text-foreground">
             {registeredEmail}
           </p>
         </div>
 
-        <p className="text-[9px] leading-relaxed text-[#999]">
+        <p className="text-xs leading-relaxed text-muted-foreground">
           Please open the email and click the confirmation link to activate your
           account.
         </p>
@@ -219,7 +219,7 @@ export function SignUpForm() {
         {isSubmitting ? "Signing up..." : "Sign up"}
       </Button>
 
-      <p className="mt-7 text-center text-[10px] text-[#999]">
+      <p className="mt-7 text-center text-xs text-muted-foreground">
         Already have an account?{" "}
         <button
           type="button"

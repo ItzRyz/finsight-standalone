@@ -23,17 +23,17 @@ export default function SignInPage() {
       }
     >
       <Tabs defaultValue="login" className="w-full">
-        <TabsList className="grid h-[32px] w-full grid-cols-2 rounded-[8px] bg-[#dfe1e5] p-1">
+        <TabsList className="grid h-[32px] w-full grid-cols-2 rounded-[8px] bg-muted p-1">
           <TabsTrigger
             value="login"
-            className="h-[24px] rounded-[6px] text-[10px] font-semibold data-[state=active]:bg-white data-[state=active]:text-[#292929] data-[state=active]:shadow-sm"
+            className="h-[24px] rounded-[6px] text-xs font-semibold data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             Sign In
           </TabsTrigger>
 
           <TabsTrigger
             value="register"
-            className="h-[24px] rounded-[6px] text-[10px] font-semibold data-[state=active]:bg-white data-[state=active]:text-[#292929] data-[state=active]:shadow-sm"
+            className="h-[24px] rounded-[6px] text-xs font-semibold data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             Sign Up
           </TabsTrigger>

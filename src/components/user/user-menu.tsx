@@ -55,7 +55,7 @@ export function UserMenu({ name, email }: UserMenuProps) {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton size="lg" tooltip="Account">
               <Avatar className="size-8 rounded-lg">
-                <AvatarFallback className="rounded-lg bg-[#ffc400] text-xs font-semibold text-white">
+                <AvatarFallback className="rounded-lg bg-primary text-xs font-semibold text-primary-foreground">
                   {initials}
                 </AvatarFallback>
               </Avatar>

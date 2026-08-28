@@ -9,6 +9,7 @@ import type { ExpenseCsvRow } from "@/lib/export/expenses-csv";
 import { useLocaleStore } from "@/stores/locale-store";
 import { formatCurrency } from "@/lib/format/currency";
 import { formatDate } from "@/lib/format/date";
+import { Button } from "@/components/ui/button";
 
 type ExpenseWithCategory = {
   id: string;
@@ -219,20 +220,12 @@ export function ExpenseList({ expenses, categories }: ExpenseListProps) {
             Page {currentPage} of {totalPages}
           </span>
           <div className="flex gap-2">
-            <button
-              className="rounded border px-3 py-1 text-sm disabled:opacity-50"
-              disabled={currentPage === 1}
-              onClick={() => setPage(currentPage - 1)}
-            >
+            <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>
               Previous
-            </button>
-            <button
-              className="rounded border px-3 py-1 text-sm disabled:opacity-50"
-              disabled={currentPage === totalPages}
-              onClick={() => setPage(currentPage + 1)}
-            >
+            </Button>
+            <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setPage(currentPage + 1)}>
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}

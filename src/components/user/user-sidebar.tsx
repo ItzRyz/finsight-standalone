@@ -98,7 +98,7 @@ export function UserSidebar({ user }: UserSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="FinSight">
               <Link href="/dashboard">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <ChartNoAxesCombined className="size-4" />
                 </div>
 

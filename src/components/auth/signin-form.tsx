@@ -106,7 +106,7 @@ export function SignInForm() {
               <div className="flex justify-end">
                 <button
                   type="button"
-                  className="text-[9px] font-medium text-primary hover:underline"
+                  className="text-xs font-medium text-primary hover:underline"
                   onClick={() => {
                     router.push("/password/forgot")
                   }}
@@ -136,7 +136,7 @@ export function SignInForm() {
 
       {/* ================= REGISTER ================= */}
 
-      <p className="mt-7 text-center text-[10px] text-[#999]">
+      <p className="mt-7 text-center text-xs text-muted-foreground">
         Not have an account?{" "}
         <button
           type="button"

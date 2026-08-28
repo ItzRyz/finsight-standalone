@@ -14,15 +14,15 @@ export function AuthShell({ children }: AuthShellProps) {
       <div className="flex min-h-svh flex-col lg:flex-row">
         {/* ================= LEFT SIDE ================= */}
 
-        <div className="relative flex w-full flex-col justify-between overflow-hidden bg-[#ffc400] px-8 py-8 text-white sm:px-12 lg:w-1/2 lg:px-14 xl:px-20">
+        <div className="relative flex w-full flex-col justify-between overflow-hidden bg-primary px-8 py-8 text-primary-foreground sm:px-12 lg:w-1/2 lg:px-14 xl:px-20">
           {/* Decorative elements */}
-          <div className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full border-40 border-white/10" />
+          <div className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full border-40 border-primary-foreground/10" />
 
-          <div className="pointer-events-none absolute -bottom-32 -left-20 size-72 rounded-full border-50 border-white/10" />
+          <div className="pointer-events-none absolute -bottom-32 -left-20 size-72 rounded-full border-50 border-primary-foreground/10" />
 
           {/* Logo */}
           <div className="relative flex items-center gap-2">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-white text-[#ffc400]">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-card text-primary">
               <TrendingUp className="size-5" />
             </div>
 
@@ -45,28 +45,28 @@ export function AuthShell({ children }: AuthShellProps) {
 
             <ul className="mt-5 space-y-2 text-xs font-medium">
               <li className="flex items-center gap-2">
-                <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white/20 text-[9px]">
+                <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary-foreground/20 text-[9px]">
                   ✓
                 </span>
                 Multi-currency wallets
               </li>
 
               <li className="flex items-center gap-2">
-                <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white/20 text-[9px]">
+                <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary-foreground/20 text-[9px]">
                   ✓
                 </span>
                 Smart budget tracking
               </li>
 
               <li className="flex items-center gap-2">
-                <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white/20 text-[9px]">
+                <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary-foreground/20 text-[9px]">
                   ✓
                 </span>
                 AI-powered analytics
               </li>
 
               <li className="flex items-center gap-2">
-                <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white/20 text-[9px]">
+                <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary-foreground/20 text-[9px]">
                   ✓
                 </span>
                 Real-time alerts
@@ -75,24 +75,22 @@ export function AuthShell({ children }: AuthShellProps) {
           </div>
 
           {/* Bottom */}
-          <div className="relative flex items-center gap-2 text-[9px] font-medium text-white/70">
+          <div className="relative flex items-center gap-2 text-xs font-medium text-primary-foreground/70">
             <LockKeyhole className="size-3" />
             Secure financial management
           </div>
         </div>
         {/* ================= RIGHT SIDE ================= */}
 
-        
-
-        <div className="flex w-full items-center justify-center bg-[#eef0f3] px-6 py-10 sm:px-10 lg:w-1/2 xl:px-14">
+        <div className="flex w-full items-center justify-center bg-muted px-6 py-10 sm:px-10 lg:w-1/2 xl:px-14">
           <div className="w-full max-w-[340px]">
             {/* Heading */}
             <div className="mb-5">
-              <h2 className="text-[24px] font-bold tracking-tight text-[#292929]">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">
                 Selamat Datang
               </h2>
 
-              <p className="mt-0.5 text-[11px] font-medium text-[#444]">
+              <p className="mt-0.5 text-xs font-medium text-muted-foreground">
                 Masuk ke akun FinSight kamu
               </p>
             </div>
