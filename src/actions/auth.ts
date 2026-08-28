@@ -21,6 +21,31 @@ function getAppUrl(): string {
   );
 }
 
+async function applyLocaleFromIpIfNeeded(userId: string) {
+  try {
+    const { headers } = await import("next/headers");
+    const h = await headers();
+    const country = h.get("x-vercel-ip-country") ?? h.get("cf-ipcountry") ?? h.get("x-country");
+    if (!country) return;
+    const { mapCountryToLocale } = await import("@/lib/i18n/country-map");
+    const mapped = mapCountryToLocale(country);
+    if (!mapped) return;
+    const dbUser = await prisma.user.findUnique({ where: { id: userId }, select: { locale: true, currency: true } });
+    // Only auto-set if still default id/IDR (user hasn't customized)
+    if (dbUser && dbUser.locale === "id" && dbUser.currency === "IDR" && (mapped.locale !== "id" || mapped.currency !== "IDR")) {
+      await prisma.user.update({ where: { id: userId }, data: { locale: mapped.locale as never, currency: mapped.currency as never } });
+      try {
+        const { cookies } = await import("next/headers");
+        const c = await cookies();
+        c.set("NEXT_LOCALE", mapped.locale, { path: "/" });
+        c.set("NEXT_CURRENCY", mapped.currency, { path: "/" });
+      } catch {}
+    }
+  } catch {
+    // silent
+  }
+}
+
 export async function updateProfile(name: string) {
   const { dbUser } = await import("@/lib/auth/get-current-user").then((module) => module.getCurrentUser());
   const normalizedName = name.trim();
@@ -35,6 +60,22 @@ export async function updateProfile(name: string) {
   if (error) return { success: false, error: error.message };
 
   await prisma.user.update({ where: { id: dbUser.id }, data: { name: normalizedName } });
+  return { success: true };
+}
+
+export async function updatePreferences(data: { locale?: "id" | "en"; currency?: "IDR" | "USD" | "EUR" | "JPY" | "SGD" }) {
+  const { dbUser } = await import("@/lib/auth/get-current-user").then((module) => module.getCurrentUser());
+  const updates: Record<string, unknown> = {};
+  if (data.locale && ["id", "en"].includes(data.locale)) updates.locale = data.locale;
+  if (data.currency && ["IDR", "USD", "EUR", "JPY", "SGD"].includes(data.currency)) updates.currency = data.currency;
+  if (Object.keys(updates).length === 0) return { success: false, error: "No valid preference" };
+  await prisma.user.update({ where: { id: dbUser.id }, data: updates });
+  try {
+    const { cookies } = await import("next/headers");
+    const c = await cookies();
+    if (updates.locale) c.set("NEXT_LOCALE", String(updates.locale), { path: "/" });
+    if (updates.currency) c.set("NEXT_CURRENCY", String(updates.currency), { path: "/" });
+  } catch {}
   return { success: true };
 }
 
@@ -93,6 +134,10 @@ export async function signUp(
     name,
   });
 
+  if (user.email_confirmed_at) {
+    await applyLocaleFromIpIfNeeded(user.id);
+  }
+
   return {
     success: true,
     data: { requiresConfirmation: !user.email_confirmed_at },
@@ -126,6 +171,15 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
       error: error.message,
     };
   }
+
+  // Dynamic locale by IP country on sign-in (before redirect)
+  try {
+    const supabase2 = await createClient();
+    const {
+      data: { user: signedUser },
+    } = await supabase2.auth.getUser();
+    if (signedUser) await applyLocaleFromIpIfNeeded(signedUser.id);
+  } catch {}
 
   redirect("/dashboard");
 }

@@ -54,6 +54,7 @@ export async function createExpense(
     merchant: formData.get("merchant"),
     location: formData.get("location"),
     receiptUrl: formData.get("receiptUrl"),
+    currency: (formData.get("currency") as string) || undefined,
   });
 
   if (!validated.success) {
@@ -76,6 +77,7 @@ export async function createExpense(
       merchant,
       location,
       receiptUrl,
+      currency,
     } = validated.data;
 
     /*
@@ -133,6 +135,7 @@ export async function createExpense(
         description: description || null,
 
         amount,
+        currency: currency ?? dbUser.currency ?? "IDR",
 
         type,
 
@@ -166,9 +169,23 @@ export async function createExpense(
           confidence: classification.confidence,
           provider: "local-keyword",
           model: "rules-v1",
+          rawResponse: { text: `${title} ${description ?? ""} ${merchant ?? ""}`.trim(), matchedCategory: classification.categoryName } as never,
           wasAccepted: false,
         },
       });
+      // Notify user about AI categorization (for review queue)
+      try {
+        await prisma.notification.create({
+          data: {
+            userId: dbUser.id,
+            type: "EXPENSE_CATEGORIZED",
+            priority: "LOW",
+            title: "AI categorization",
+            message: `"${title}" auto-categorized as ${classification.categoryName} (${Number(classification.confidence).toFixed(2)}) — review in Expenses → Review`,
+            expenseId: expense.id,
+          },
+        });
+      } catch {}
     }
 
     await reconcileBudgetAlerts(dbUser.id);
@@ -176,6 +193,7 @@ export async function createExpense(
     revalidatePath("/expenses");
     revalidatePath("/dashboard");
     revalidatePath("/budgets");
+    revalidatePath("/expenses/review");
 
     return {
       success: true,
@@ -207,6 +225,7 @@ export async function updateExpense(
     merchant: formData.get("merchant"),
     location: formData.get("location"),
     receiptUrl: formData.get("receiptUrl"),
+    currency: (formData.get("currency") as string) || undefined,
   });
 
   if (!validated.success) {
@@ -290,6 +309,7 @@ export async function updateExpense(
         description: validated.data.description || null,
 
         amount: validated.data.amount,
+        currency: validated.data.currency ?? existingExpense.currency ?? "IDR",
 
         type: validated.data.type,
 
@@ -317,6 +337,16 @@ export async function updateExpense(
       },
     });
 
+    // Mark AI categorization as corrected if user changed category that was AI
+    if (existingExpense.categorizationSource === "AI" && validCategoryId !== existingExpense.categoryId) {
+      try {
+        await prisma.aiCategorization.updateMany({
+          where: { expenseId: existingExpense.id, userId: dbUser.id, wasCorrected: false },
+          data: { wasCorrected: true, categoryId: validCategoryId, rawResponse: { correctedTo: validCategoryId } as never },
+        });
+      } catch {}
+    }
+
     // ==========================================
     // Recalculate budgets
     // ==========================================
@@ -326,6 +356,7 @@ export async function updateExpense(
     revalidatePath("/expenses");
     revalidatePath("/budgets");
     revalidatePath("/dashboard");
+    revalidatePath("/expenses/review");
 
     return {
       success: true,

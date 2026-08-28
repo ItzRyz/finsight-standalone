@@ -10,7 +10,12 @@ export default async function SettingsPage() {
         <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground">Manage your profile and account.</p>
       </div>
-      <SettingsForm name={dbUser.name ?? ""} email={authUser.email ?? ""} />
+      <SettingsForm
+        name={dbUser.name ?? ""}
+        email={authUser.email ?? ""}
+        locale={(dbUser.locale as "id" | "en") ?? "id"}
+        currency={(dbUser.currency as "IDR" | "USD" | "EUR" | "JPY" | "SGD") ?? "IDR"}
+      />
     </main>
   );
 }

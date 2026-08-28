@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { EditExpenseDialog } from "@/components/expenses/edit-expense-dialog";
 import { ExportCsvButton } from "@/components/expenses/export-csv-button";
 import type { ExpenseCsvRow } from "@/lib/export/expenses-csv";
+import { useLocaleStore } from "@/stores/locale-store";
+import { formatCurrency } from "@/lib/format/currency";
+import { formatDate } from "@/lib/format/date";
 
 type ExpenseWithCategory = {
   id: string;
@@ -14,6 +17,7 @@ type ExpenseWithCategory = {
   title: string;
   description: string | null;
   amount: number;
+  currency?: string;
   type: "EXPENSE" | "INCOME";
   expenseDate: Date;
   merchant: string | null;
@@ -36,6 +40,7 @@ type ExpenseListProps = {
 };
 
 export function ExpenseList({ expenses, categories }: ExpenseListProps) {
+  const { locale, currency: pref } = useLocaleStore();
   const [query, setQuery] = useState("");
   const [type, setType] = useState<"ALL" | "EXPENSE" | "INCOME">("ALL");
   const [categoryId, setCategoryId] = useState("ALL");
@@ -185,15 +190,16 @@ export function ExpenseList({ expenses, categories }: ExpenseListProps) {
                   <div className="text-right">
                     <p className={isIncome ? "font-semibold text-emerald-600" : "font-semibold text-foreground"}>
                       {isIncome ? "+" : "-"}
-                      {formatAmount(expense.amount)}
+                      {formatCurrency(expense.amount, (expense.currency as never) ?? pref, locale)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(expense.expenseDate).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {formatDate(expense.expenseDate, locale)}
                     </p>
+                    {expense.receiptUrl && (
+                      <a href={expense.receiptUrl} target="_blank" rel="noreferrer" className="text-[10px] text-primary underline">
+                        receipt
+                      </a>
+                    )}
                   </div>
                   <EditExpenseDialog expense={expense} categories={categories} />
                   <DeleteExpenseDialog expenseId={expense.id} title={expense.title} />
@@ -234,10 +240,4 @@ export function ExpenseList({ expenses, categories }: ExpenseListProps) {
   );
 }
 
-function formatAmount(amount: unknown) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(Number(amount));
-}
+

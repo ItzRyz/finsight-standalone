@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "welcome": "Selamat Datang",
+    "enterAccount": "Masuk ke akun FinSight kamu",
+    "checkMail": "Cek email kamu!"
+  },
+  "dashboard": { "welcome": "Selamat datang kembali" },
+  "budgets": { "manage": "Kelola budget dan pantau pengeluaranmu" },
+  "validators": {
+    "titleMin": "Judul minimal 2 karakter",
+    "amountPositive": "Nominal harus lebih dari 0",
+    "budgetPositive": "Budget harus lebih dari 0"
+  }
+}

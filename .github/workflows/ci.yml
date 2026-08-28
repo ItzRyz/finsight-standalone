@@ -1,0 +1,33 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: finsight_test
+          POSTGRES_PASSWORD: finsight_test
+          POSTGRES_DB: finsight_test
+        ports: ["5433:5432"]
+        options: --health-cmd pg_isready --health-interval 2s --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm test
+      - name: migrate test db
+        env:
+          DATABASE_URL: postgresql://finsight_test:finsight_test@localhost:5433/finsight_test
+          DIRECT_URL: postgresql://finsight_test:finsight_test@localhost:5433/finsight_test
+        run: |
+          npx prisma migrate deploy
+          npx prisma generate
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: build-logs, path: .next }

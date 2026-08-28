@@ -15,6 +15,8 @@ export const budgetSchema = z.object({
   period: z.enum(["MONTHLY", "YEARLY"]),
 
   warningThreshold: z.number().min(1, "Minimal 1%").max(100, "Maksimal 100%"),
+
+  currency: z.enum(["IDR", "USD", "EUR", "JPY", "SGD"]).optional(),
 });
 
 export type BudgetInput = z.infer<typeof budgetSchema>;

@@ -25,6 +25,12 @@ export async function getCurrentUser() {
     throw new Error("Authenticated user does not have an application profile.");
   }
 
+  if (!dbUser.isActive) {
+    // Force sign out deactivated accounts
+    await supabase.auth.signOut();
+    redirect("/auth?error=deactivated");
+  }
+
   return {
     authUser: user,
     dbUser,

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 const rules: Record<string, string[]> = {
   Food: ["makan", "lunch", "dinner", "breakfast", "coffee", "kopi", "restaurant", "warung", "food", "groceries"],
   Transportation: ["grab", "gojek", "taxi", "fuel", "bensin", "transport", "parking", "parkir", "bus", "train"],
-  Bills: ["internet", " listrik", "electric", "phone", "bill", "tagihan", "subscription", "netflix"],
+  Bills: ["internet", "listrik", "electric", "phone", "bill", "tagihan", "subscription", "netflix"],
   Shopping: ["shop", "shopping", "tokopedia", "shopee", "keyboard", "shoes", "clothes"],
   Health: ["medicine", "obat", "doctor", "dokter", "health", "apotek"],
   Entertainment: ["movie", "film", "game", "music", "concert", "entertainment"],

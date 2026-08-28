@@ -5,6 +5,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
+import { cookies } from "next/headers";
+import { LocaleProvider } from "@/components/providers/locale-provider";
 
 const APP_NAME = "FinSight";
 const APP_DEFAULT_TITLE = "FinSight";
@@ -58,10 +60,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const cookieStore = await cookies();
+  const locale = (cookieStore.get("NEXT_LOCALE")?.value as "id" | "en") ?? "id";
   return (
     <html
-      lang="en"
+      lang={locale}
       dir="ltr"
       className={cn(
         "h-full",
@@ -78,7 +82,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <SerwistProvider swUrl="/serwist/sw.js">
           <ThemeProvider>
-            <TooltipProvider>{children}</TooltipProvider>
+            <LocaleProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+            </LocaleProvider>
           </ThemeProvider>
         </SerwistProvider>
       </body>

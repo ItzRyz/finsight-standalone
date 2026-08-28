@@ -1,7 +1,12 @@
+"use client";
+
+import Link from "next/link";
 import { AlertTriangle, CheckCircle2, CircleAlert } from "lucide-react";
 
 import { Progress } from "@/components/ui/progress";
 import { BudgetActions } from "@/components/budgets/budget-actions";
+import { useLocaleStore } from "@/stores/locale-store";
+import { formatCurrency } from "@/lib/format/currency";
 
 type Budget = {
   id: string;
@@ -9,6 +14,7 @@ type Budget = {
   name: string | null;
 
   amount: unknown;
+  currency?: string;
 
   warningThreshold: unknown;
 
@@ -42,7 +48,8 @@ type Props = {
 
 export function BudgetCard({ budget, categories }: Props) {
   const amount = Number(budget.amount);
-
+  const { locale, currency: prefCurrency } = useLocaleStore();
+  const currency = (budget.currency as "IDR" | "USD" | "EUR" | "JPY" | "SGD") ?? prefCurrency;
   const progress = Math.min(budget.percentage, 100);
 
   const title = budget.name ?? budget.category?.name ?? "General Budget";
@@ -75,13 +82,13 @@ export function BudgetCard({ budget, categories }: Props) {
         <div>
           <p className="text-xs text-muted-foreground">Spent</p>
 
-          <p className="text-xl font-bold">{formatIDR(budget.spent)}</p>
+          <p className="text-xl font-bold">{formatCurrency(budget.spent, currency, locale)}</p>
         </div>
 
         <div className="text-right">
           <p className="text-xs text-muted-foreground">Budget</p>
 
-          <p className="font-medium">{formatIDR(amount)}</p>
+          <p className="font-medium">{formatCurrency(amount, currency, locale)}</p>
         </div>
       </div>
 
@@ -96,9 +103,14 @@ export function BudgetCard({ budget, categories }: Props) {
 
         <span>
           {budget.remaining > 0
-            ? `${formatIDR(budget.remaining)} remaining`
+            ? `${formatCurrency(budget.remaining, currency, locale)} remaining`
             : "Budget exceeded"}
         </span>
+      </div>
+      <div className="mt-3">
+        <Link href={`/budgets/alerts?budgetId=${budget.id}`} className="text-xs text-primary hover:underline">
+          View alerts →
+        </Link>
       </div>
       <BudgetActions
         id={budget.id}
@@ -140,10 +152,4 @@ function BudgetStatus({ status }: { status: "SAFE" | "WARNING" | "EXCEEDED" }) {
   );
 }
 
-function formatIDR(value: number) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
+

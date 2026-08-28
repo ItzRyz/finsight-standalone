@@ -67,6 +67,19 @@ enum AiCategorizationStatus {
   FAILED
 }
 
+enum Locale {
+  id
+  en
+}
+
+enum Currency {
+  IDR
+  USD
+  EUR
+  JPY
+  SGD
+}
+
 /**
  * =========================================================
  * USER
@@ -81,6 +94,9 @@ model User {
 
   role     UserRole @default(USER)
   isActive Boolean  @default(true)
+
+  locale   Locale   @default(id)
+  currency Currency @default(IDR)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -146,8 +162,9 @@ model Expense {
   title       String
   description String?
 
-  amount Decimal     @db.Decimal(15, 2)
-  type   ExpenseType @default(EXPENSE)
+  amount   Decimal     @db.Decimal(15, 2)
+  currency Currency    @default(IDR)
+  type     ExpenseType @default(EXPENSE)
 
   expenseDate DateTime
 
@@ -239,7 +256,8 @@ model Budget {
 
   name String?
 
-  amount Decimal @db.Decimal(15, 2)
+  amount   Decimal  @db.Decimal(15, 2)
+  currency Currency @default(IDR)
 
   period BudgetPeriod @default(MONTHLY)
 

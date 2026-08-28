@@ -31,6 +31,8 @@ export async function createBudget(
     period: formData.get("period"),
 
     warningThreshold,
+
+    currency: (formData.get("currency") as string) || undefined,
   });
 
   if (!validated.success) {
@@ -43,7 +45,7 @@ export async function createBudget(
   try {
     const { dbUser } = await getCurrentUser();
 
-    const { name, categoryId, period } = validated.data;
+    const { name, categoryId, period, currency } = validated.data;
 
     // ---------------------------------------------
     // Validate category ownership
@@ -105,6 +107,8 @@ export async function createBudget(
 
         periodEnd: end,
 
+        currency: currency ?? dbUser.currency ?? "IDR",
+
         isActive: true,
       },
     });
@@ -129,6 +133,7 @@ export async function createBudget(
         name: name || null,
 
         amount: validated.data.amount,
+        currency: currency ?? dbUser.currency ?? "IDR",
 
         period,
 
@@ -191,6 +196,8 @@ export async function getBudgets() {
           userId: dbUser.id,
 
           type: "EXPENSE",
+          // Only count same currency (real multi-currency budget)
+          currency: ((budget as unknown as { currency: string }).currency ?? "IDR") as never,
 
           expenseDate: {
             gte: budget.periodStart,
@@ -209,7 +216,7 @@ export async function getBudgets() {
         },
       });
 
-      const spent = Number(result._sum.amount ?? 0);
+      const spent = Number((result._sum as unknown as { amount: unknown })?.amount ?? 0);
 
       const budgetAmount = Number(budget.amount);
 
@@ -233,6 +240,7 @@ export async function getBudgets() {
         name: budget.name,
 
         amount: budgetAmount,
+        currency: (budget as unknown as { currency: string }).currency ?? "IDR",
 
         warningThreshold: Number(budget.warningThreshold),
 
@@ -276,6 +284,7 @@ export async function updateBudget(
     categoryId: formData.get("categoryId"),
     period: formData.get("period"),
     warningThreshold: Number(formData.get("warningThreshold")),
+    currency: (formData.get("currency") as string) || undefined,
   });
 
   if (!validated.success) {
@@ -305,7 +314,7 @@ export async function updateBudget(
       };
     }
 
-    const { name, categoryId, period } = validated.data;
+    const { name, categoryId, period, currency } = validated.data;
 
     // ---------------------------------------------
     // Validate category ownership
@@ -363,6 +372,7 @@ export async function updateBudget(
         period,
         periodStart: start,
         periodEnd: end,
+        currency: currency ?? "IDR",
         isActive: true,
         NOT: {
           id: existingBudget.id,
@@ -392,6 +402,7 @@ export async function updateBudget(
         name: name || null,
         categoryId: validCategoryId,
         amount: validated.data.amount,
+        currency: currency ?? "IDR",
         period,
         periodStart: start,
         periodEnd: end,

@@ -46,6 +46,8 @@ export const expenseSchema = z.object({
     .or(z.literal("")),
 
   receiptUrl: z.url("URL receipt tidak valid").optional().or(z.literal("")),
+
+  currency: z.enum(["IDR", "USD", "EUR", "JPY", "SGD"]).optional(),
 });
 
 // export type ExpenseFormInput = z.input<typeof expenseSchema>;

@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "welcome": "Welcome",
+    "enterAccount": "Sign in to your FinSight account",
+    "checkMail": "Check your mail!"
+  },
+  "dashboard": { "welcome": "Welcome back" },
+  "budgets": { "manage": "Manage budgets and track spending" },
+  "validators": {
+    "titleMin": "Title min 2 characters",
+    "amountPositive": "Amount must be > 0",
+    "budgetPositive": "Budget must be > 0"
+  }
+}

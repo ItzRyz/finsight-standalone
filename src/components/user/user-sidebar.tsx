@@ -12,6 +12,8 @@ import {
   Settings,
   WalletCards,
   ShieldCheck,
+  Eye,
+  History,
 } from "lucide-react";
 
 import {
@@ -55,6 +57,16 @@ const mainNavigation = [
     title: "Notifications",
     href: "/notifications",
     icon: Bell,
+  },
+  {
+    title: "Review",
+    href: "/expenses/review",
+    icon: Eye,
+  },
+  {
+    title: "Alerts",
+    href: "/budgets/alerts",
+    icon: History,
   },
 ];
 

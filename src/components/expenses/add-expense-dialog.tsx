@@ -13,6 +13,7 @@ import {
   //   type ExpenseFormOutput,
   type ExpenseInput,
 } from "@/lib/validators/expense";
+import { useLocaleStore } from "@/stores/locale-store";
 
 import { createExpense } from "@/actions/expenses";
 
@@ -50,6 +51,7 @@ type AddExpenseDialogProps = {
 
 export function AddExpenseDialog({ categories }: AddExpenseDialogProps) {
   const [open, setOpen] = useState(false);
+  const preferredCurrency = useLocaleStore((s) => s.currency);
 
   const {
     control,
@@ -69,6 +71,7 @@ export function AddExpenseDialog({ categories }: AddExpenseDialogProps) {
       merchant: "",
       location: "",
       receiptUrl: "",
+      currency: preferredCurrency,
     },
   });
 
@@ -92,6 +95,7 @@ export function AddExpenseDialog({ categories }: AddExpenseDialogProps) {
     formData.set("location", values.location ?? "");
 
     formData.set("receiptUrl", values.receiptUrl ?? "");
+    formData.set("currency", (values.currency as string) ?? preferredCurrency);
 
     const result = await createExpense(formData);
 
@@ -330,16 +334,38 @@ export function AddExpenseDialog({ categories }: AddExpenseDialogProps) {
             )}
           />
 
-          {/* Receipt URL */}
+          {/* Currency */}
+
+          <Controller
+            name="currency"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Currency</FieldLabel>
+                <Select value={field.value as string} onValueChange={field.onChange}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="IDR">IDR — Rupiah</SelectItem>
+                    <SelectItem value="USD">USD — Dollar</SelectItem>
+                    <SelectItem value="EUR">EUR — Euro</SelectItem>
+                    <SelectItem value="JPY">JPY — Yen</SelectItem>
+                    <SelectItem value="SGD">SGD — Dollar</SelectItem>
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+
+          {/* Receipt (Storage — public read) */}
 
           <Controller
             name="receiptUrl"
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Receipt URL</FieldLabel>
-
-                <Input {...field} type="url" placeholder="https://..." />
+                <FieldLabel>Receipt URL (public)</FieldLabel>
+                <Input {...field} placeholder="https://... or upload via Storage later" />
 
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />

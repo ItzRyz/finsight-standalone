@@ -8,9 +8,12 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "tsx --test tests/**/*.test.ts",
+    "test:ci": "npm run db:test:deploy && npm test",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
+    "db:test:deploy": "prisma migrate deploy",
+    "db:test:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
     "db:format": "prisma format",
     "db:reset": "prisma migrate reset"
