@@ -10,7 +10,7 @@ import { expenseSchema } from "@/lib/validators/expense";
 import { getZodErrors } from "@/lib/validators/utils";
 
 import { reconcileBudgetAlerts } from "@/lib/budget/reconcile-budget-alerts";
-import { classifyExpense } from "@/lib/ai/local-categorize";
+import { classifyExpense } from "@/lib/ai/classify";
 import type { ActionResult } from "@/types/action";
 
 export async function getExpenses() {
@@ -160,6 +160,7 @@ export async function createExpense(
     });
 
     if (classification) {
+      const startMark = Date.now();
       await prisma.aiCategorization.create({
         data: {
           expenseId: expense.id,
@@ -167,9 +168,10 @@ export async function createExpense(
           categoryId: classification.categoryId,
           status: "COMPLETED",
           confidence: classification.confidence,
-          provider: "local-keyword",
-          model: "rules-v1",
-          rawResponse: { text: `${title} ${description ?? ""} ${merchant ?? ""}`.trim(), matchedCategory: classification.categoryName } as never,
+          provider: (classification as unknown as { provider: string }).provider ?? "local-keyword",
+          model: (classification as unknown as { model: string }).model ?? "rules-v1",
+          rawResponse: (classification as unknown as { rawResponse: unknown }).rawResponse as never ?? ({ text: `${title} ${description ?? ""} ${merchant ?? ""}`.trim(), matchedCategory: classification.categoryName } as never),
+          processingTimeMs: Date.now() - startMark,
           wasAccepted: false,
         },
       });
