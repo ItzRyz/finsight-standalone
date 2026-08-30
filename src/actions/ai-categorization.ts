@@ -44,12 +44,22 @@ async function saveRetrainJobId(aiId: string, jobId: string | null) {
 
 export async function getReviewQueue() {
   const { dbUser } = await getCurrentUser();
-  return prisma.aiCategorization.findMany({
+  const rows = await prisma.aiCategorization.findMany({
     where: { userId: dbUser.id, wasAccepted: false, wasCorrected: false, status: "COMPLETED" },
     include: { expense: { include: { category: true } }, category: true },
     orderBy: [{ confidence: "asc" }, { createdAt: "desc" }],
     take: 50,
   });
+  return rows.map((r) => ({
+    ...r,
+    confidence: r.confidence != null ? Number(r.confidence) : null,
+    expense: r.expense
+      ? {
+          ...r.expense,
+          amount: Number((r.expense as unknown as { amount: unknown }).amount),
+        }
+      : r.expense,
+  }));
 }
 
 export async function acceptAiCategorization(id: string) {
