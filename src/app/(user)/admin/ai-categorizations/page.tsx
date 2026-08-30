@@ -16,14 +16,12 @@ export default async function AiCategorizationAdminPage() {
   ]);
   const mlPending = pending.pending_feedback ?? localPending;
   const threshold = pending.retrain_threshold ?? 10;
-  const isOffline = !!pending.error;
   return (
     <main className="flex flex-1 flex-col gap-6 p-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">AI Categorizations</h1>
         <p className="text-sm text-muted-foreground">
-          Last 100 • {items.length} rows • ML pending: {mlPending}/{threshold}{" "}
-          {isOffline ? <span className="text-xs">(offline — lokal {localPending})</span> : null}
+          Last 100 • {items.length} rows • ML pending: {mlPending}/{threshold}
         </p>
         <p className="text-xs text-muted-foreground">ai.finsight.space • job_id tersimpan di kolom retrainJobId • polling /job/&#123;id&#125; via badge</p>
       </div>
