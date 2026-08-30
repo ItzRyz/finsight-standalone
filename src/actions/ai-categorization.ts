@@ -6,18 +6,39 @@ import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { getAiConfig } from "@/lib/ai/config";
 import { SYSTEM_TO_ML, mlLabelToSystem } from "@/lib/ai/category-map";
 
-async function postFeedbackToMl(text: string, predicted: string, corrected: string) {
+async function postFeedbackToMl(text: string, predicted: string, corrected: string): Promise<string | null> {
   try {
-    const { url, enabled } = getAiConfig();
-    if (!enabled) return;
+    const { url, enabled, timeout } = getAiConfig();
+    if (!enabled) return null;
     const clean = text.trim().slice(0, 500);
-    if (!clean || !predicted || !corrected) return;
-    // fire-and-forget, don't await block
-    fetch(`${url}/api/v1/feedback`, {
+    if (!clean || !predicted || !corrected) return null;
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), Math.min(timeout, 5000));
+    const res = await fetch(`${url}/api/v1/feedback`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Request-ID": crypto.randomUUID().slice(0, 8) },
       body: JSON.stringify({ text: clean, predicted_label: predicted.toLowerCase(), corrected_label: corrected.toLowerCase() }),
-    }).catch(() => {});
+      signal: controller.signal,
+    }).finally(() => clearTimeout(t));
+    if (!res.ok) {
+      if (res.status === 429) {
+        const retry = res.headers.get("Retry-After");
+        console.warn("feedback 429", retry);
+      }
+      return null;
+    }
+    const data = (await res.json().catch(() => null)) as { job_id?: string | null; jobId?: string | null } | null;
+    const jobId = data?.job_id ?? data?.jobId ?? null;
+    return jobId ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function saveRetrainJobId(aiId: string, jobId: string | null) {
+  if (!jobId) return;
+  try {
+    await prisma.aiCategorization.update({ where: { id: aiId }, data: { retrainJobId: jobId } });
   } catch {}
 }
 
@@ -51,7 +72,7 @@ export async function acceptAiCategorization(id: string) {
   // Feedback to ML is_correct=true (no retrain trigger, but log)
   const raw = item.rawResponse as unknown as { predicted_label?: string } | null;
   const predicted = raw?.predicted_label ?? item.category?.name?.toLowerCase() ?? "other";
-  postFeedbackToMl(item.expense.title, predicted, predicted);
+  postFeedbackToMl(item.expense.title, predicted, predicted).then((jid) => saveRetrainJobId(item.id, jid));
   revalidatePath("/expenses/review");
   return { success: true };
 }
@@ -91,7 +112,7 @@ export async function correctAiCategorization(id: string, newCategoryId: string 
     const raw = item.rawResponse as unknown as { predicted_label?: string } | null;
     const predicted = raw?.predicted_label ?? "other";
     const correctedMl = SYSTEM_TO_ML[newCategoryName] ?? newCategoryName.toLowerCase();
-    postFeedbackToMl(`${item.expense.title}`, predicted, correctedMl);
+    postFeedbackToMl(`${item.expense.title}`, predicted, correctedMl).then((jid) => saveRetrainJobId(item.id, jid));
   }
 
   revalidatePath("/expenses/review");

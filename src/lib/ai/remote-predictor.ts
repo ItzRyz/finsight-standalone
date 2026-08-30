@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 const memCache = new Map<string, { result: AiResult | null; ts: number }>();
 const CACHE_MS = 5 * 60 * 1000;
 const MAX_TEXT = 500;
+const MAX_CACHE_SIZE = 500;
 
 export async function classifyExpenseRemote(text: string): Promise<AiResult | null> {
   const trimmed = text.trim().slice(0, MAX_TEXT);
@@ -55,6 +56,10 @@ export async function classifyExpenseRemote(text: string): Promise<AiResult | nu
     };
 
     memCache.set(trimmed, { result, ts: Date.now() });
+    if (memCache.size > MAX_CACHE_SIZE) {
+      const first = memCache.keys().next().value as string | undefined;
+      if (first) memCache.delete(first);
+    }
     return result;
   } catch (e) {
     if (e instanceof RateLimitError) throw e;

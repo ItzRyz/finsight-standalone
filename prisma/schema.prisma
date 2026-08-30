@@ -223,6 +223,9 @@ model AiCategorization {
   wasAccepted  Boolean @default(false)
   wasCorrected Boolean @default(false)
 
+  // Async retrain job from ai.finsight.space POST /feedback
+  retrainJobId String?
+
   processingTimeMs Int?
 
   errorMessage String?
@@ -239,6 +242,7 @@ model AiCategorization {
   @@index([categoryId])
   @@index([status])
   @@index([createdAt])
+  @@index([retrainJobId])
   @@map("ai_categorizations")
 }
 

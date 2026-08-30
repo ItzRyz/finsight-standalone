@@ -4,6 +4,7 @@ import { classifyExpense as classifyLocal } from "./local-categorize";
 import type { AiResult } from "./types";
 
 let fallbackOnlyUntil = 0;
+let consecutiveFailures = 0;
 
 export async function classifyExpense(text: string): Promise<AiResult | null> {
   const { enabled } = getAiConfig();
@@ -11,19 +12,25 @@ export async function classifyExpense(text: string): Promise<AiResult | null> {
 
   if (Date.now() < fallbackOnlyUntil) return toAiResult(await classifyLocal(text));
 
-  let failures = 0;
   try {
     const remote = await classifyExpenseRemote(text);
-    if (remote) return remote;
-    // null from remote (not found) → fallback
+    if (remote) {
+      consecutiveFailures = 0;
+      return remote;
+    }
+    // null from remote (not found) → fallback, reset failures
+    consecutiveFailures = 0;
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "";
-    if (msg.includes("RateLimit")) {
-      // don't spam, go fallback briefly
-      fallbackOnlyUntil = Date.now() + 60_000;
+    if (e instanceof Error && e.name === "RateLimitError") {
+      const retryAfter = (e as unknown as { retryAfter?: number }).retryAfter ?? 60;
+      fallbackOnlyUntil = Date.now() + retryAfter * 1000;
+      consecutiveFailures = 0;
     } else {
-      failures++;
-      if (failures >= 3) fallbackOnlyUntil = Date.now() + 5 * 60_000;
+      consecutiveFailures++;
+      if (consecutiveFailures >= 3) {
+        fallbackOnlyUntil = Date.now() + 5 * 60_000;
+        consecutiveFailures = 0;
+      }
     }
   }
 
