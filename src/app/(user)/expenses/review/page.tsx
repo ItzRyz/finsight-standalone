@@ -13,9 +13,10 @@ export default async function ReviewPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">AI Review Queue</h1>
           <p className="text-sm text-muted-foreground">
-            {queue.length} pending • {health.model_loaded ? "AI ai.finsight.space ready" : "AI lokal active (remote degraded)"} • confidence {health.model_loaded ? "0.92" : "0.82"} default{health.model_loaded ? "" : " — fallback lokal"} • {health.latencyMs ?? 0}ms
+            {queue.length} pending • {health.ok && health.model_loaded ? "AI ai.finsight.space ready • confidence 0.92" : "AI unavailable — queued/failed will retry"} • {health.latencyMs ?? 0}ms
           </p>
-          {health.error && <p className="mt-2 text-xs text-muted-foreground">Health: {health.error} • Set FINSIGHT_AI_ENABLED=false to force local only.</p>}
+          {health.error && <p className="mt-2 text-xs text-destructive">Health: {health.error}</p>}
+          {!health.ok && <p className="mt-1 text-xs text-muted-foreground">Remote only — expenses saved uncategorized when AI 429/503/timeout, retry via Review.</p>}
         </div>
         <ReviewQueue items={queue as never} categories={categories} />
       </main>

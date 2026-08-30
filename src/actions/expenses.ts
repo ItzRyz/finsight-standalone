@@ -119,9 +119,16 @@ export async function createExpense(
       validCategoryId = category.id;
     }
 
-    const classification = validCategoryId
-      ? null
-      : await classifyExpense(`${title} ${description ?? ""} ${merchant ?? ""}`);
+    let classification: Awaited<ReturnType<typeof classifyExpense>> | null = null;
+    let classifyError: string | null = null;
+    if (!validCategoryId) {
+      try {
+        classification = await classifyExpense(`${title} ${description ?? ""} ${merchant ?? ""}`);
+      } catch (e) {
+        classifyError = e instanceof Error ? e.message : String(e);
+        classification = null;
+      }
+    }
     const finalCategoryId = validCategoryId ?? classification?.categoryId ?? null;
 
     const expense = await prisma.expense.create({
@@ -147,10 +154,6 @@ export async function createExpense(
 
         receiptUrl: receiptUrl || null,
 
-        /*
-         * User manually created
-         * this expense.
-         */
         categorizationSource: classification ? "AI" : "MANUAL",
       },
 
@@ -168,14 +171,13 @@ export async function createExpense(
           categoryId: classification.categoryId,
           status: "COMPLETED",
           confidence: classification.confidence,
-          provider: (classification as unknown as { provider: string }).provider ?? "local-keyword",
-          model: (classification as unknown as { model: string }).model ?? "rules-v1",
-          rawResponse: (classification as unknown as { rawResponse: unknown }).rawResponse as never ?? ({ text: `${title} ${description ?? ""} ${merchant ?? ""}`.trim(), matchedCategory: classification.categoryName } as never),
+          provider: classification.provider,
+          model: classification.model,
+          rawResponse: classification.rawResponse as never,
           processingTimeMs: Date.now() - startMark,
           wasAccepted: false,
         },
       });
-      // Notify user about AI categorization (for review queue)
       try {
         await prisma.notification.create({
           data: {
@@ -184,6 +186,35 @@ export async function createExpense(
             priority: "LOW",
             title: "AI categorization",
             message: `"${title}" auto-categorized as ${classification.categoryName} (${Number(classification.confidence).toFixed(2)}) — review in Expenses → Review`,
+            expenseId: expense.id,
+          },
+        });
+      } catch {}
+    } else if (classifyError) {
+      // Remote-only: queue as FAILED for retry via review, expense stays uncategorized
+      await prisma.aiCategorization.create({
+        data: {
+          expenseId: expense.id,
+          userId: dbUser.id,
+          categoryId: null,
+          status: "FAILED",
+          confidence: null,
+          provider: "finsight-ml",
+          model: "1.9.0",
+          rawResponse: { text: `${title} ${description ?? ""} ${merchant ?? ""}`.trim(), error: classifyError } as never,
+          errorMessage: classifyError.slice(0, 500),
+          wasAccepted: false,
+          wasCorrected: false,
+        },
+      });
+      try {
+        await prisma.notification.create({
+          data: {
+            userId: dbUser.id,
+            type: "SYSTEM",
+            priority: "HIGH",
+            title: "AI unavailable — saved uncategorized",
+            message: `"${title}" not categorized: ${classifyError}. Buka Expenses → Review untuk retry.`,
             expenseId: expense.id,
           },
         });

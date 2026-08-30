@@ -6,33 +6,26 @@ export type AiPending = { pending_feedback?: number; retrain_threshold?: number;
 export type AiJob = { job_id: string; status: string; pending_feedback?: number; result?: unknown; error?: string } | null;
 
 export async function checkAiHealth(): Promise<AiHealth> {
-  const { url, enabled, timeout } = getAiConfig();
-  // Fallback lokal selalu ada (local-categorize) → anggap AI tidak pernah offline dari sisi user
-  if (!enabled) return { ok: true, model_loaded: false, error: "local fallback (disabled)" };
+  const { url, timeout } = getAiConfig();
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), Math.min(timeout, 3000));
   const start = Date.now();
   try {
     const res = await fetch(`${url}/api/v1/health/ready`, { signal: controller.signal, cache: "no-store" });
     const latencyMs = Date.now() - start;
-    if (!res.ok) {
-      // Remote 503/500 → fallback lokal, tetap ok agar UI tidak "offline"
-      return { ok: true, model_loaded: false, latencyMs, error: `remote http ${res.status} — fallback lokal` };
-    }
+    if (!res.ok) return { ok: false, model_loaded: false, latencyMs, error: `http ${res.status}` };
     const data = (await res.json()) as { model_loaded?: boolean; status?: string };
-    const okRemote = !!data.model_loaded || data.status === "ready";
-    if (!okRemote) return { ok: true, model_loaded: false, latencyMs, error: `remote not_ready — fallback lokal` };
-    return { ok: true, model_loaded: true, latencyMs };
+    const ok = !!data.model_loaded || data.status === "ready";
+    return { ok, model_loaded: !!data.model_loaded, latencyMs, error: ok ? undefined : "not_ready" };
   } catch (e) {
-    return { ok: true, model_loaded: false, error: `local fallback: ${e instanceof Error ? e.message : String(e)}` };
+    return { ok: false, model_loaded: false, error: e instanceof Error ? e.message : String(e) };
   } finally {
     clearTimeout(t);
   }
 }
 
 export async function checkAiLive(): Promise<AiLive> {
-  const { url, enabled, timeout } = getAiConfig();
-  if (!enabled) return { ok: false, error: "disabled" };
+  const { url, timeout } = getAiConfig();
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), Math.min(timeout, 3000));
   const start = Date.now();
@@ -50,8 +43,7 @@ export async function checkAiLive(): Promise<AiLive> {
 }
 
 export async function getAiPending(): Promise<AiPending> {
-  const { url, enabled, timeout } = getAiConfig();
-  if (!enabled) return { error: "disabled" };
+  const { url, timeout } = getAiConfig();
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), Math.min(timeout, 3000));
   try {
@@ -66,8 +58,8 @@ export async function getAiPending(): Promise<AiPending> {
 }
 
 export async function getAiJob(jobId: string): Promise<AiJob> {
-  const { url, enabled, timeout } = getAiConfig();
-  if (!enabled || !jobId) return null;
+  const { url, timeout } = getAiConfig();
+  if (!jobId) return null;
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), Math.min(timeout, 3000));
   try {

@@ -17,9 +17,9 @@ test("reverse map Food → food", () => {
   assert.equal(SYSTEM_TO_ML["Food"], "food");
 });
 test("config defaults to ai.finsight.space", () => {
-  const { url, enabled } = getAiConfig();
+  const { url, timeout } = getAiConfig();
   assert.ok(url.includes("ai.finsight.space"));
-  assert.equal(typeof enabled, "boolean");
+  assert.equal(typeof timeout, "number");
 });
 
 // Remote predictor — mocked fetch

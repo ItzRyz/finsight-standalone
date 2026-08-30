@@ -3,14 +3,14 @@ import { mlLabelToSystem } from "./category-map";
 import { RateLimitError, type AiResult } from "./types";
 import { prisma } from "@/lib/prisma";
 
-const memCache = new Map<string, { result: AiResult | null; ts: number }>();
+const memCache = new Map<string, { result: AiResult; ts: number }>();
 const CACHE_MS = 5 * 60 * 1000;
 const MAX_TEXT = 500;
 const MAX_CACHE_SIZE = 500;
 
-export async function classifyExpenseRemote(text: string): Promise<AiResult | null> {
+export async function classifyExpenseRemote(text: string): Promise<AiResult> {
   const trimmed = text.trim().slice(0, MAX_TEXT);
-  if (!trimmed) return null;
+  if (!trimmed) throw new Error("Text empty");
 
   const cached = memCache.get(trimmed);
   if (cached && Date.now() - cached.ts < CACHE_MS) return cached.result;
@@ -29,30 +29,35 @@ export async function classifyExpenseRemote(text: string): Promise<AiResult | nu
 
     if (res.status === 429) {
       const retryAfter = Number(res.headers.get("Retry-After") ?? "60");
-      throw new RateLimitError("Rate limit", retryAfter);
+      throw new RateLimitError("Rate limit exceeded", retryAfter);
     }
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      if (res.status === 422) throw new Error(`Validation 422: ${body.slice(0, 200)}`);
+      if (res.status === 503) throw new Error(`Service unavailable 503: ${body.slice(0, 200)}`);
+      throw new Error(`AI http ${res.status}: ${body.slice(0, 200)}`);
+    }
 
     const data = (await res.json()) as { predicted_label: string; text: string };
     const mlLabel = String(data.predicted_label ?? "").toLowerCase().trim();
-    if (!mlLabel) return null;
+    if (!mlLabel) throw new Error("Empty predicted_label from AI");
 
     const systemName = mlLabelToSystem(mlLabel);
     const category = await prisma.category.findFirst({
       where: { name: systemName, type: "SYSTEM", userId: null },
       select: { id: true },
     });
+    if (!category) throw new Error(`System category not found for ${systemName} (ml:${mlLabel})`);
 
-    // confidence: ML model has no prob → hardcode 0.92 (higher than local 0.82) to indicate remote
     const result: AiResult = {
-      categoryId: category?.id ?? null,
+      categoryId: category.id,
       categoryName: mlLabel,
       systemName,
-      confidence: category ? 0.92 : 0.82,
+      confidence: 0.92,
       provider: "finsight-ml",
       model: "1.9.0",
-      rawResponse: { text: trimmed, predicted_label: mlLabel, systemName, categoryId: category?.id ?? null },
+      rawResponse: { text: trimmed, predicted_label: mlLabel, systemName, categoryId: category.id },
     };
 
     memCache.set(trimmed, { result, ts: Date.now() });
@@ -63,7 +68,8 @@ export async function classifyExpenseRemote(text: string): Promise<AiResult | nu
     return result;
   } catch (e) {
     if (e instanceof RateLimitError) throw e;
-    return null;
+    if (e instanceof Error && e.name === "AbortError") throw new Error(`AI timeout ${timeout}ms`);
+    throw e;
   } finally {
     clearTimeout(t);
   }

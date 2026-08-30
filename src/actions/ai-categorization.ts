@@ -8,8 +8,7 @@ import { SYSTEM_TO_ML, mlLabelToSystem } from "@/lib/ai/category-map";
 
 async function postFeedbackToMl(text: string, predicted: string, corrected: string): Promise<string | null> {
   try {
-    const { url, enabled, timeout } = getAiConfig();
-    if (!enabled) return null;
+    const { url, timeout } = getAiConfig();
     const clean = text.trim().slice(0, 500);
     if (!clean || !predicted || !corrected) return null;
     const controller = new AbortController();
@@ -45,7 +44,7 @@ async function saveRetrainJobId(aiId: string, jobId: string | null) {
 export async function getReviewQueue() {
   const { dbUser } = await getCurrentUser();
   const rows = await prisma.aiCategorization.findMany({
-    where: { userId: dbUser.id, wasAccepted: false, wasCorrected: false, status: "COMPLETED" },
+    where: { userId: dbUser.id, wasAccepted: false, wasCorrected: false, status: { in: ["COMPLETED", "FAILED"] } },
     include: { expense: { include: { category: true } }, category: true },
     orderBy: [{ confidence: "asc" }, { createdAt: "desc" }],
     take: 50,
