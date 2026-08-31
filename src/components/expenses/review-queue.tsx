@@ -30,14 +30,14 @@ export function ReviewQueue({ items, categories }: { items: Item[]; categories: 
     <div className="space-y-3">
       {items.map((item) => (
         <div key={item.id} className="rounded-xl border bg-card p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="font-medium">{item.expense.title} <span className="text-xs text-muted-foreground">→ {item.category?.icon} {item.category?.name ?? "Uncategorized"}</span></p>
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="font-medium truncate">{item.expense.title} <span className="text-xs text-muted-foreground">→ {item.category?.icon} {item.category?.name ?? "Uncategorized"}</span></p>
               <p className="text-xs text-muted-foreground">
                 {item.expense.merchant ?? "—"} • {new Date(item.expense.expenseDate).toLocaleDateString("id-ID")} • {item.provider}:{item.model} • conf {Number(item.confidence ?? 0).toFixed(2)}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <Button
                 size="sm"
                 disabled={pending}
@@ -49,7 +49,7 @@ export function ReviewQueue({ items, categories }: { items: Item[]; categories: 
                 value={selected[item.id] ?? ""}
                 onValueChange={(v) => setSelected((s) => ({ ...s, [item.id]: v }))}
               >
-                <SelectTrigger className="h-8 w-[180px]"><SelectValue placeholder="Correct to…" /></SelectTrigger>
+                <SelectTrigger className="h-8 w-full sm:w-[180px]"><SelectValue placeholder="Correct to…" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">Uncategorized</SelectItem>
                   {categories.map((c) => (

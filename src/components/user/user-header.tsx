@@ -19,12 +19,14 @@ type AppHeaderProps = {
 };
 
 export function UserHeader({ title }: AppHeaderProps) {
+  const parts = title.includes(" — ") ? title.split(" — ") : title.includes(" - ") ? title.split(" - ") : [title];
+  const isHierarchical = parts.length > 1;
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background">
-      <div className="flex items-center gap-2 px-4">
-        <SidebarTrigger className="-ml-1" />
+    <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background overflow-hidden">
+      <div className="flex min-w-0 items-center gap-2 px-4">
+        <SidebarTrigger className="-ml-1 shrink-0" />
 
-        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Separator orientation="vertical" className="mr-2 h-4 shrink-0" />
 
         <Breadcrumb>
           <BreadcrumbList>
@@ -36,14 +38,28 @@ export function UserHeader({ title }: AppHeaderProps) {
               <ChevronRight />
             </BreadcrumbSeparator>
 
-            <BreadcrumbItem>
-              <BreadcrumbPage>{title}</BreadcrumbPage>
-            </BreadcrumbItem>
+            {isHierarchical ? (
+              <>
+                <BreadcrumbItem className="hidden sm:block">
+                  <span className="text-muted-foreground">{parts[0]}</span>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden sm:block">
+                  <ChevronRight />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem className="min-w-0">
+                  <BreadcrumbPage className="truncate max-w-[150px] sm:max-w-none">{parts.slice(1).join(" — ")}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </>
+            ) : (
+              <BreadcrumbItem className="min-w-0">
+                <BreadcrumbPage className="truncate max-w-[150px] sm:max-w-none">{title}</BreadcrumbPage>
+              </BreadcrumbItem>
+            )}
           </BreadcrumbList>
         </Breadcrumb>
       </div>
 
-      <div className="flex items-center gap-1 px-4">
+      <div className="flex shrink-0 items-center gap-1 px-4">
         <NotificationMenu />
 
         <ThemeToggle />

@@ -14,6 +14,7 @@ import {
   type ExpenseInput,
 } from "@/lib/validators/expense";
 import { useLocaleStore } from "@/stores/locale-store";
+import { toast } from "sonner";
 
 import { createExpense } from "@/actions/expenses";
 
@@ -64,7 +65,7 @@ export function AddExpenseDialog({ categories }: AddExpenseDialogProps) {
     defaultValues: {
       title: "",
       description: "",
-      amount: 0,
+      amount: undefined as unknown as number,
       type: "EXPENSE",
       categoryId: "",
       expenseDate: new Date(),
@@ -114,11 +115,13 @@ export function AddExpenseDialog({ categories }: AddExpenseDialogProps) {
           type: "server",
           message: result.error,
         });
+        toast.error(result.error);
       }
 
       return;
     }
 
+    toast.success("Transaction created");
     reset();
     setOpen(false);
   }
@@ -196,17 +199,16 @@ export function AddExpenseDialog({ categories }: AddExpenseDialogProps) {
                 <Input
                   id="amount"
                   type="number"
-                  min="0"
+                  min="1"
                   step="1"
+                  inputMode="numeric"
                   placeholder="50000"
-                  value={field.value ?? ""}
+                  value={field.value == null ? "" : String(field.value)}
                   onChange={(event) => {
-                    field.onChange(
-                      event.target.value === ""
-                        ? 0
-                        : Number(event.target.value),
-                    );
+                    const v = event.target.value;
+                    field.onChange(v === "" ? undefined : Number(v));
                   }}
+                  onFocus={(e) => e.target.select()}
                   onBlur={field.onBlur}
                   name={field.name}
                   ref={field.ref}

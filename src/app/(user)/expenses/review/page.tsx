@@ -9,7 +9,7 @@ export default async function ReviewPage() {
   return (
     <>
       <UserHeader title="Review" />
-      <main className="flex flex-1 flex-col gap-6 p-6">
+      <main className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">AI Review Queue</h1>
           <p className="text-sm text-muted-foreground">

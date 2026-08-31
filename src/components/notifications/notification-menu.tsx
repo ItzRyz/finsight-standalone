@@ -45,7 +45,7 @@ export function NotificationMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
           <Bell className="size-4" />
 
           {unreadCount > 0 && (
@@ -56,7 +56,7 @@ export function NotificationMenu() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-[360px] p-0">
+      <DropdownMenuContent align="end" className="w-[min(360px,calc(100vw-1rem))] p-0">
         <div className="flex items-center justify-between px-4 py-3">
           <DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
 
@@ -75,7 +75,7 @@ export function NotificationMenu() {
 
         <DropdownMenuSeparator />
 
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-[min(400px,60vh)]">
           {notifications.length === 0 ? (
             <div className="flex h-[250px] items-center justify-center px-6 text-center">
               <div>

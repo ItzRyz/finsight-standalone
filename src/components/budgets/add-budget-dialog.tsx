@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { budgetSchema, type BudgetInput } from "@/lib/validators/budget";
 import { useLocaleStore } from "@/stores/locale-store";
+import { toast } from "sonner";
 
 import { createBudget } from "@/actions/budgets";
 
@@ -56,7 +57,7 @@ export function AddBudgetDialog({ categories }: { categories: Category[] }) {
 
     defaultValues: {
       name: "",
-      amount: 0,
+      amount: undefined as unknown as number,
       categoryId: "",
       period: "MONTHLY",
       warningThreshold: 80,
@@ -95,11 +96,13 @@ export function AddBudgetDialog({ categories }: { categories: Category[] }) {
           type: "server",
           message: result.error,
         });
+        toast.error(result.error);
       }
 
       return;
     }
 
+    toast.success("Budget created");
     reset();
 
     setOpen(false);
@@ -114,7 +117,7 @@ export function AddBudgetDialog({ categories }: { categories: Category[] }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Add Budget</DialogTitle>
         </DialogHeader>
@@ -149,14 +152,16 @@ export function AddBudgetDialog({ categories }: { categories: Category[] }) {
 
                 <Input
                   type="number"
-                  min="0"
+                  min="1"
                   step="1"
-                  value={field.value ?? ""}
+                  inputMode="numeric"
+                  placeholder="500000"
+                  value={field.value == null ? "" : String(field.value)}
                   onChange={(e) => {
-                    const value = e.target.value;
-
-                    field.onChange(value === "" ? 0 : Number(value));
+                    const v = e.target.value;
+                    field.onChange(v === "" ? undefined : Number(v));
                   }}
+                  onFocus={(e) => e.target.select()}
                 />
 
                 {fieldState.invalid && (
@@ -237,10 +242,13 @@ export function AddBudgetDialog({ categories }: { categories: Category[] }) {
                     type="number"
                     min="1"
                     max="100"
-                    value={field.value ?? ""}
+                    inputMode="numeric"
+                    value={field.value == null ? "" : String(field.value)}
                     onChange={(e) => {
-                      field.onChange(Number(e.target.value));
+                      const v = e.target.value;
+                      field.onChange(v === "" ? undefined : Number(v));
                     }}
+                    onFocus={(e) => e.target.select()}
                   />
 
                   <span className="text-sm text-muted-foreground">%</span>

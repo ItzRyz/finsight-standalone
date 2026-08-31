@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <main className="flex flex-1 flex-col gap-6 p-6" aria-busy="true">
+    <main className="flex flex-1 flex-col gap-6 p-4 sm:p-6" aria-busy="true">
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-2">
           <div className="h-8 w-32 animate-pulse rounded-md bg-muted" />

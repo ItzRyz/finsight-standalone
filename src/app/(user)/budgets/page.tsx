@@ -50,7 +50,7 @@ export default async function BudgetsPage() {
   return (
     <>
       <UserHeader title="Budgets" />
-      <main className="flex flex-1 flex-col gap-6 p-6">
+      <main className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
         {/* Header */}
 
         <div className="flex items-center justify-between gap-4">

@@ -162,7 +162,7 @@ export function ExpenseList({ expenses, categories }: ExpenseListProps) {
           type="date"
           value={fromDate}
           aria-label="From date"
-          className="w-auto bg-card"
+          className="w-full sm:w-auto bg-card"
           onChange={(event) => {
             setFromDate(event.target.value);
             setPage(1);
@@ -172,13 +172,30 @@ export function ExpenseList({ expenses, categories }: ExpenseListProps) {
           type="date"
           value={toDate}
           aria-label="To date"
-          className="w-auto bg-card"
+          className="w-full sm:w-auto bg-card"
           onChange={(event) => {
             setToDate(event.target.value);
             setPage(1);
           }}
         />
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          {(query || type !== "ALL" || categoryId !== "ALL" || currencyFilter !== "ALL" || fromDate || toDate) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setQuery("");
+                setType("ALL");
+                setCategoryId("ALL");
+                setCurrencyFilter("ALL");
+                setFromDate("");
+                setToDate("");
+                setPage(1);
+              }}
+            >
+              Clear filters
+            </Button>
+          )}
           <ExportCsvButton expenses={csvRows} />
         </div>
       </div>
@@ -229,12 +246,30 @@ export function ExpenseList({ expenses, categories }: ExpenseListProps) {
           })}
         </div>
         {filteredExpenses.length === 0 && (
-          <p className="p-8 text-center text-sm text-muted-foreground">No matching transactions.</p>
+          <div className="p-8 text-center">
+            <p className="text-sm text-muted-foreground">No matching transactions.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              onClick={() => {
+                setQuery("");
+                setType("ALL");
+                setCategoryId("ALL");
+                setCurrencyFilter("ALL");
+                setFromDate("");
+                setToDate("");
+                setPage(1);
+              }}
+            >
+              Clear filters
+            </Button>
+          </div>
         )}
       </div>
 
       {filteredExpenses.length > pageSize && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm text-muted-foreground">
             Page {currentPage} of {totalPages}
           </span>

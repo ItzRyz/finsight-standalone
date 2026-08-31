@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { setUserActive, setUserRole } from "@/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 type User = {
   id: string;
@@ -56,15 +57,30 @@ export function AdminUsers({ users }: { users: User[] }) {
                 </Select>
               </td>
               <td className="p-3">
-                <Button
-                  size="sm"
-                  variant={user.isActive ? "outline" : "destructive"}
-                  disabled={pending}
-                  onClick={() => run(() => setUserActive(user.id, !user.isActive))}
-                  aria-label={`${user.isActive ? "Deactivate" : "Activate"} ${user.email}`}
-                >
-                  {user.isActive ? "Deactivate" : "Activate"}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={user.isActive ? "outline" : "destructive"}
+                      disabled={pending}
+                      aria-label={`${user.isActive ? "Deactivate" : "Activate"} ${user.email}`}
+                    >
+                      {user.isActive ? "Deactivate" : "Activate"}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{user.isActive ? "Deactivate user?" : "Activate user?"}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {user.isActive ? `Deactivate ${user.email}? They will be signed out immediately.` : `Activate ${user.email}?`}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => run(() => setUserActive(user.id, !user.isActive))}>Confirm</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </td>
             </tr>
           ))}

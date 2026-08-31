@@ -70,8 +70,10 @@ export function EditExpenseDialog({ expense, categories }: { expense: Expense; c
               name="amount"
               type="number"
               min="1"
-              step="0.01"
+              step="1"
+              inputMode="numeric"
               defaultValue={Number(expense.amount)}
+              onFocus={(e) => e.target.select()}
               required
             />
           </div>

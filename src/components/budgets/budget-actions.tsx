@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Loader2, Pencil, Trash2 } from "lucide-react";
 
 import { deleteBudget, updateBudget } from "@/actions/budgets";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,15 +110,14 @@ export function BudgetActions({
     const result = await updateBudget(id, formData);
 
     if (!result.success) {
-      setError(
-        result.error ??
-          Object.values(result.fieldErrors ?? {})[0] ??
-          "Gagal mengubah budget.",
-      );
+      const msg = result.error ?? Object.values(result.fieldErrors ?? {})[0] ?? "Gagal mengubah budget.";
+      setError(msg);
+      toast.error(msg);
       setIsSubmitting(false);
       return;
     }
 
+    toast.success("Budget updated");
     setIsSubmitting(false);
     setOpen(false);
   }
@@ -127,9 +127,11 @@ export function BudgetActions({
     const result = await deleteBudget(id);
     if (!result.success) {
       setError(result.error ?? "Gagal menghapus budget.");
+      toast.error(result.error ?? "Gagal menghapus budget.");
       setIsDeleting(false);
       return;
     }
+    toast.success("Budget deleted");
     setIsDeleting(false);
   }
 
@@ -146,7 +148,7 @@ export function BudgetActions({
           </Button>
         </DialogTrigger>
 
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit budget</DialogTitle>
           </DialogHeader>
@@ -180,6 +182,7 @@ export function BudgetActions({
                 type="number"
                 min="1"
                 step="1"
+                inputMode="numeric"
                 value={form.amount}
                 onChange={(event) =>
                   setForm((current) => ({
@@ -187,6 +190,7 @@ export function BudgetActions({
                     amount: event.target.value,
                   }))
                 }
+                onFocus={(e) => e.target.select()}
                 required
               />
             </Field>
@@ -266,6 +270,7 @@ export function BudgetActions({
                   type="number"
                   min="1"
                   max="100"
+                  inputMode="numeric"
                   value={form.warningThreshold}
                   onChange={(event) =>
                     setForm((current) => ({
@@ -273,6 +278,7 @@ export function BudgetActions({
                       warningThreshold: event.target.value,
                     }))
                   }
+                  onFocus={(e) => e.target.select()}
                   required
                 />
                 <span className="text-sm text-muted-foreground">%</span>

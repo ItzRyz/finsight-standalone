@@ -46,13 +46,8 @@ export function DeleteExpenseDialog({ expenseId, title }: Props) {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="text-destructive"
-        onClick={() => setOpen(true)}
-      >
-        🗑️
+      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => setOpen(true)} aria-label={`Delete ${title}`}>
+        <span aria-hidden>🗑️</span>
       </Button>
 
       <AlertDialog open={open} onOpenChange={setOpen}>

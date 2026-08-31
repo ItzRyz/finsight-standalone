@@ -85,7 +85,7 @@ export function SystemCategoryManager({ categories }: { categories: Category[] }
         <DialogTrigger asChild>
           <Button>Add system category</Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Add system category</DialogTitle>
           </DialogHeader>
@@ -125,7 +125,7 @@ export function SystemCategoryManager({ categories }: { categories: Category[] }
                       <DialogTrigger asChild>
                         <Button size="sm" variant="outline">Edit</Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
                         <DialogHeader>
                           <DialogTitle>Edit {category.name}</DialogTitle>
                         </DialogHeader>

@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { deleteNotificationAsAdmin, markNotificationReadAsAdmin } from "@/actions/admin";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 type Notification = {
   id: string;
@@ -58,15 +59,23 @@ export function AdminNotifications({ notifications }: { notifications: Notificat
                   >
                     {notification.isRead ? "Mark unread" : "Mark read"}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={pending}
-                    className="text-destructive"
-                    onClick={() => run(() => deleteNotificationAsAdmin(notification.id))}
-                  >
-                    Delete
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="ghost" disabled={pending} className="text-destructive">
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete notification?</AlertDialogTitle>
+                        <AlertDialogDescription>This will permanently delete this notification for {notification.user.email}.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => run(() => deleteNotificationAsAdmin(notification.id))}>Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </td>
             </tr>

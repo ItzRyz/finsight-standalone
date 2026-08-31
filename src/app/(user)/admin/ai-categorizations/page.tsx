@@ -20,7 +20,7 @@ export default async function AiCategorizationAdminPage() {
   return (
     <>
       <UserHeader title="Admin — AI Categorizations" />
-      <main className="flex flex-1 flex-col gap-6 p-6">
+      <main className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">AI Categorizations</h1>
         <p className="text-sm text-muted-foreground">
@@ -29,7 +29,7 @@ export default async function AiCategorizationAdminPage() {
         <p className="text-xs text-muted-foreground">ai.finsight.space • job_id tersimpan di kolom retrainJobId • polling /job/&#123;id&#125; via badge</p>
       </div>
       <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[720px] text-sm">
           <thead className="border-b text-left text-muted-foreground">
             <tr>
               <th className="p-3">Expense</th>

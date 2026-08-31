@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cookies } from "next/headers";
 import { LocaleProvider } from "@/components/providers/locale-provider";
+import { Toaster } from "sonner";
 
 const APP_NAME = "FinSight";
 const APP_DEFAULT_TITLE = "FinSight — AI-Powered Multicurrency Expense Tracker";
@@ -148,6 +149,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <ThemeProvider>
             <LocaleProvider>
               <TooltipProvider>{children}</TooltipProvider>
+              <Toaster richColors position="top-right" />
             </LocaleProvider>
           </ThemeProvider>
         </SerwistProvider>
