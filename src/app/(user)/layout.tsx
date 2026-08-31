@@ -25,6 +25,8 @@ export default async function AppLayout({
           name: dbUser.name,
           email: authUser.email,
           role: dbUser.role,
+          locale: dbUser.locale as "id" | "en",
+          currency: dbUser.currency as "IDR" | "USD" | "EUR" | "JPY" | "SGD",
         }}
       />
       <SidebarInset>

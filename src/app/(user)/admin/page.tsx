@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format/date";
 import { AdminExpenseVolume, AdminNotificationsTrend } from "@/components/charts/admin-trend";
+import { UserHeader } from "@/components/user/user-header";
 
 export default async function AdminPage() {
   await requireAdmin();
@@ -20,6 +21,68 @@ export default async function AdminPage() {
   const notificationPoints = makeTrend(notificationTrend, () => 1);
   const aiCount = (status: "PENDING" | "COMPLETED" | "FAILED") => ai.find((item) => item.status === status)?._count._all ?? 0;
   const links = [["Users", "/admin/users"], ["System categories", "/admin/categories"], ["Expenses", "/admin/expenses"], ["Notifications", "/admin/notifications"], ["AI categorizations", "/admin/ai-categorizations"]];
-  return <main className="flex flex-1 flex-col gap-6 p-6"><div><h1 className="text-2xl font-bold tracking-tight">Admin analytics</h1><p className="text-sm text-muted-foreground">Platform activity for the last 30 days.</p></div><section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><Metric title="Users" value={users} /><Metric title="Transactions" value={expenses} /><Metric title="Notifications" value={notifications} /><Metric title="AI completed" value={aiCount("COMPLETED")} /></section><section className="grid gap-4 xl:grid-cols-2"><div className="rounded-xl border bg-card p-5"><h2 className="font-semibold">Expense volume</h2><p className="text-sm text-muted-foreground">Expense amount created in the last 7 days</p><div className="mt-6"><AdminExpenseVolume data={expensePoints} /></div></div><div className="rounded-xl border bg-card p-5"><h2 className="font-semibold">Notifications</h2><p className="text-sm text-muted-foreground">Notifications created in the last 7 days</p><div className="mt-6"><AdminNotificationsTrend data={notificationPoints} /></div></div></section><section className="grid gap-4 xl:grid-cols-2"><div className="rounded-xl border bg-card p-5"><h2 className="font-semibold">System category usage</h2><div className="mt-4 space-y-3">{categoryStats.map((category) => <div key={category.name} className="flex justify-between text-sm"><span>{category.icon} {category.name}</span><span className="text-muted-foreground">{category._count.expenses} expenses</span></div>)}</div></div><div className="rounded-xl border bg-card p-5"><h2 className="font-semibold">AI categorization</h2><div className="mt-4 grid grid-cols-3 gap-3"><Metric title="Completed" value={aiCount("COMPLETED")} compact /><Metric title="Pending" value={aiCount("PENDING")} compact /><Metric title="Failed" value={aiCount("FAILED")} compact /></div></div></section><section className="flex flex-wrap gap-3">{links.map(([label, href]) => <Link key={href} href={href} className="rounded-lg border px-3 py-2 text-sm hover:bg-muted">Manage {label}</Link>)}</section></main>;
+  return (
+    <>
+      <UserHeader title="Admin — Overview" />
+      <main className="flex flex-1 flex-col gap-6 p-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Admin analytics</h1>
+          <p className="text-sm text-muted-foreground">Platform activity for the last 30 days.</p>
+        </div>
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Metric title="Users" value={users} />
+          <Metric title="Transactions" value={expenses} />
+          <Metric title="Notifications" value={notifications} />
+          <Metric title="AI completed" value={aiCount("COMPLETED")} />
+        </section>
+        <section className="grid gap-4 xl:grid-cols-2">
+          <div className="rounded-xl border bg-card p-5">
+            <h2 className="font-semibold">Expense volume</h2>
+            <p className="text-sm text-muted-foreground">Expense amount created in the last 7 days</p>
+            <div className="mt-6">
+              <AdminExpenseVolume data={expensePoints} />
+            </div>
+          </div>
+          <div className="rounded-xl border bg-card p-5">
+            <h2 className="font-semibold">Notifications</h2>
+            <p className="text-sm text-muted-foreground">Notifications created in the last 7 days</p>
+            <div className="mt-6">
+              <AdminNotificationsTrend data={notificationPoints} />
+            </div>
+          </div>
+        </section>
+        <section className="grid gap-4 xl:grid-cols-2">
+          <div className="rounded-xl border bg-card p-5">
+            <h2 className="font-semibold">System category usage</h2>
+            <div className="mt-4 space-y-3">
+              {categoryStats.map((category) => (
+                <div key={category.name} className="flex justify-between text-sm">
+                  <span>
+                    {category.icon} {category.name}
+                  </span>
+                  <span className="text-muted-foreground">{category._count.expenses} expenses</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border bg-card p-5">
+            <h2 className="font-semibold">AI categorization</h2>
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              <Metric title="Completed" value={aiCount("COMPLETED")} compact />
+              <Metric title="Pending" value={aiCount("PENDING")} compact />
+              <Metric title="Failed" value={aiCount("FAILED")} compact />
+            </div>
+          </div>
+        </section>
+        <section className="flex flex-wrap gap-3">
+          {links.map(([label, href]) => (
+            <Link key={href} href={href} className="rounded-lg border px-3 py-2 text-sm hover:bg-muted">
+              Manage {label}
+            </Link>
+          ))}
+        </section>
+      </main>
+    </>
+  );
 }
 function Metric({ title, value, compact = false }: { title: string; value: number; compact?: boolean }) { return <div className={compact ? "rounded-lg bg-muted p-3" : "rounded-xl border bg-card p-5"}><p className="text-sm text-muted-foreground">{title}</p><p className={compact ? "mt-1 text-xl font-bold" : "mt-2 text-3xl font-bold"}>{value.toLocaleString("id-ID")}</p></div>; }

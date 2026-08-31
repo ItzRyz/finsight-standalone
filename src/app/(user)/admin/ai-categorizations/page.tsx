@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
 import { getAiPending } from "@/lib/ai/health";
 import { JobBadge } from "@/components/admin/job-badge";
+import { UserHeader } from "@/components/user/user-header";
 
 export default async function AiCategorizationAdminPage() {
   await requireAdmin();
@@ -17,9 +18,11 @@ export default async function AiCategorizationAdminPage() {
   const mlPending = pending.pending_feedback ?? localPending;
   const threshold = pending.retrain_threshold ?? 10;
   return (
-    <main className="flex flex-1 flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">AI Categorizations</h1>
+    <>
+      <UserHeader title="Admin — AI Categorizations" />
+      <main className="flex flex-1 flex-col gap-6 p-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">AI Categorizations</h1>
         <p className="text-sm text-muted-foreground">
           Last 100 • {items.length} rows • ML pending: {mlPending}/{threshold}
         </p>
@@ -55,6 +58,7 @@ export default async function AiCategorizationAdminPage() {
           </tbody>
         </table>
       </div>
-    </main>
+      </main>
+    </>
   );
 }
