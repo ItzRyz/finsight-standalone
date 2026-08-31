@@ -90,7 +90,7 @@ export default async function DashboardPage({
           <StatCard icon={<ArrowUpRight />} title="Savings" value={fmt(monthlyIncome - monthlyExpense)} detail="This month" />
         </section>
         <section className="grid gap-4 lg:grid-cols-7">
-          <div className="rounded-xl border bg-card p-6 lg:col-span-4">
+          <div className="rounded-xl border bg-card p-4 sm:p-6 overflow-hidden min-w-0 lg:col-span-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-semibold">Spending overview</h2>
@@ -106,7 +106,7 @@ export default async function DashboardPage({
               <SpendingBar data={spendingData} currency={preferredCurrency} locale={locale} />
             </div>
           </div>
-          <div className="rounded-xl border bg-card p-6 lg:col-span-3">
+          <div className="rounded-xl border bg-card p-4 sm:p-6 overflow-hidden min-w-0 lg:col-span-3">
             <h2 className="font-semibold">Recent transactions</h2>
             <div className="mt-4 divide-y">
               {recentExpenses.length === 0 ? (
@@ -132,14 +132,14 @@ export default async function DashboardPage({
           </div>
         </section>
         <section className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-xl border bg-card p-6">
+          <div className="rounded-xl border bg-card p-4 sm:p-6 overflow-hidden min-w-0">
             <h2 className="font-semibold">Income vs Expense (12 months)</h2>
             <p className="mt-1 text-sm text-muted-foreground">Monthly flow in {preferredCurrency}.</p>
             <div className="mt-4">
               <IncomeExpenseArea data={trendData} currency={preferredCurrency} locale={locale} />
             </div>
           </div>
-          <div className="rounded-xl border bg-card p-6">
+          <div className="rounded-xl border bg-card p-4 sm:p-6 overflow-hidden min-w-0">
             <h2 className="font-semibold">Spending by category</h2>
             <p className="mt-1 text-sm text-muted-foreground">Top categories for {range === "12m" ? "12 months" : "30 days"}.</p>
             <div className="mt-4">
@@ -159,7 +159,7 @@ export default async function DashboardPage({
             )}
           </div>
         </section>
-        <section className="rounded-xl border bg-card p-6">
+        <section className="rounded-xl border bg-card p-4 sm:p-6 overflow-hidden min-w-0">
           <h2 className="font-semibold">Budget utilization</h2>
           <p className="mt-1 text-sm text-muted-foreground">Active budgets — spent vs budget.</p>
           <div className="mt-4">

@@ -14,10 +14,10 @@ export function BudgetRadial({ data, currency, locale }: Props) {
   if (data.length === 0) return <div className="flex h-48 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">No active budgets</div>;
   return (
     <ChartContainer config={{ spent: { label: "Spent", color: "var(--chart-1)" }, budget: { label: "Budget", color: "var(--chart-2)" } }} className="h-64 w-full">
-      <BarChart data={data} layout="vertical" margin={{ left: isMobile ? 8 : 24, right: 16 }}>
+      <BarChart data={data} layout="vertical" margin={{ left: 12, right: 16 }}>
         <CartesianGrid horizontal={false} strokeDasharray="3 3" />
         <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCurrency(v, currency, locale)} />
-        <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} width={isMobile ? 70 : 90} />
+        <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} width={isMobile ? 84 : 96} />
         <ChartTooltip content={<ChartTooltipContent formatter={(v: any) => formatCurrency(Number(v), currency, locale)} />} />
         <ChartLegend content={<ChartLegendContent />} />
         <Bar dataKey="budget" fill="var(--color-budget)" radius={[0, 6, 6, 0]} />

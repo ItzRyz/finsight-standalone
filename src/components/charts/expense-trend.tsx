@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Bar, CartesianGrid, XAxis, YAxis, Line, ComposedChart } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { formatCurrency } from "@/lib/format/currency";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { Currency } from "@/stores/locale-store";
 
 type ExpenseForChart = { amount: number; currency?: string; type: "EXPENSE" | "INCOME"; expenseDate: Date; category?: { name: string } | null };
@@ -32,20 +33,21 @@ export function ExpenseTrend({ expenses, currency, locale, rates }: Props) {
     });
   }, [expenses, currency, locale, rates, range]);
 
+  const isMobile = useIsMobile();
   if (expenses.length === 0) return <div className="flex h-48 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">No transactions to chart</div>;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 overflow-hidden">
       <div className="flex gap-1">
         {(["7d", "30d"] as const).map((r) => (
           <button key={r} onClick={() => setRange(r)} className={r === range ? "rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground" : "rounded-md border px-2.5 py-1 text-xs"}>{r}</button>
         ))}
       </div>
       <ChartContainer config={{ expense: { label: "Expense", color: "var(--chart-1)" }, income: { label: "Income", color: "var(--chart-2)" } }} className="h-64 w-full">
-        <ComposedChart data={data} margin={{ left: 8, right: 8, top: 4 }}>
+        <ComposedChart data={data} margin={{ left: 12, right: 8, top: 4 }}>
           <CartesianGrid vertical={false} strokeDasharray="3 3" />
           <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} interval={range === "30d" ? 4 : 0} />
-          <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCurrency(v, currency, locale)} width={80} />
+          <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCurrency(v, currency, locale)} width={isMobile ? 84 : 92} />
           <ChartTooltip content={<ChartTooltipContent formatter={(v: any) => formatCurrency(Number(v), currency, locale)} />} />
           <ChartLegend content={<ChartLegendContent />} />
           <Bar dataKey="expense" fill="var(--color-expense)" radius={[6, 6, 0, 0]} />

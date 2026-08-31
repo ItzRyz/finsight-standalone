@@ -14,10 +14,10 @@ export function BudgetVsSpent({ data, currency, locale }: Props) {
   if (!data.length) return <div className="flex h-48 items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">Create a budget to see chart</div>;
   return (
     <ChartContainer config={{ spent: { label: "Spent", color: "var(--chart-1)" }, budget: { label: "Budget", color: "var(--chart-5)" } }} className="h-72 w-full">
-      <BarChart data={data} margin={{ left: 4, right: 8 }}>
+      <BarChart data={data} margin={{ left: 12, right: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} interval={0} angle={isMobile ? -20 : -15} dy={10} height={40} />
-        <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCurrency(v, currency, locale)} width={isMobile ? 78 : 88} />
+        <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCurrency(v, currency, locale)} width={isMobile ? 84 : 92} />
         <ChartTooltip content={<ChartTooltipContent formatter={(v: any) => formatCurrency(Number(v), currency, locale)} />} />
         <Bar dataKey="budget" fill="var(--color-budget)" radius={[6, 6, 0, 0]} />
         <Bar dataKey="spent" fill="var(--color-spent)" radius={[6, 6, 0, 0]} />
