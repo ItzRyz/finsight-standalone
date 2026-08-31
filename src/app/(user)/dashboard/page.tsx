@@ -146,9 +146,14 @@ export default async function DashboardPage({
               <CategoryDonut data={categoryData} currency={preferredCurrency} locale={locale} />
             </div>
             {categoryData.length > 0 && (
-              <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                 {categoryData.map((c) => (
-                  <div key={c.name} className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: c.fill }} />{c.icon} {c.name} · {fmt(c.value)}</div>
+                  <div key={c.name} className="flex items-center gap-2 min-w-0">
+                    <span className="size-2 shrink-0 rounded-full" style={{ background: c.fill }} />
+                    <span className="truncate" title={`${c.name} · ${fmt(c.value)}`}>
+                      {c.icon} {c.name} · {fmt(c.value)}
+                    </span>
+                  </div>
                 ))}
               </div>
             )}
@@ -168,13 +173,13 @@ export default async function DashboardPage({
 
 function StatCard({ icon, title, value, detail }: { icon: React.ReactNode; title: string; value: string; detail: string }) {
   return (
-    <div className="rounded-xl border bg-card p-5">
+    <div className="rounded-xl border bg-card p-5 min-w-0">
       <div className="flex items-center justify-between text-muted-foreground">
-        <p className="text-sm">{title}</p>
-        <span className="[&_svg]:size-4">{icon}</span>
+        <p className="text-sm truncate">{title}</p>
+        <span className="[&_svg]:size-4 shrink-0">{icon}</span>
       </div>
-      <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
+      <p className="mt-2 text-2xl font-bold tracking-tight truncate" title={value}>{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground truncate" title={detail}>{detail}</p>
     </div>
   );
 }

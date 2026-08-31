@@ -16,10 +16,10 @@ export function IncomeExpenseArea({ data, currency, locale }: Props) {
   }
   return (
     <ChartContainer config={{ income: { label: "Income", color: "var(--chart-2)" }, expense: { label: "Expense", color: "var(--chart-1)" } }} className="h-64 w-full">
-      <AreaChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
+      <AreaChart data={data} margin={{ left: 8, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-        <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCurrency(v, currency, locale)} width={isMobile ? 56 : 80} />
+        <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCurrency(v, currency, locale)} width={isMobile ? 78 : 88} />
         <ChartTooltip content={<ChartTooltipContent formatter={(v: any) => formatCurrency(Number(v), currency, locale)} />} />
         <ChartLegend content={<ChartLegendContent />} />
         <Area type="monotone" dataKey="income" stroke="var(--color-income)" fill="var(--color-income)" fillOpacity={0.2} strokeWidth={2} />

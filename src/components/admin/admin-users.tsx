@@ -23,7 +23,7 @@ export function AdminUsers({ users }: { users: User[] }) {
 
   return (
     <div className="overflow-x-auto rounded-xl border bg-card">
-      <table className="w-full text-sm">
+      <table className="w-full min-w-[560px] text-sm">
         <caption className="sr-only">Users</caption>
         <thead className="border-b text-left text-muted-foreground">
           <tr>

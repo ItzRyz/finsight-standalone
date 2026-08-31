@@ -42,7 +42,7 @@ export function ExpenseTrend({ expenses, currency, locale, rates }: Props) {
         ))}
       </div>
       <ChartContainer config={{ expense: { label: "Expense", color: "var(--chart-1)" }, income: { label: "Income", color: "var(--chart-2)" } }} className="h-64 w-full">
-        <ComposedChart data={data} margin={{ left: 4, right: 8, top: 4 }}>
+        <ComposedChart data={data} margin={{ left: 8, right: 8, top: 4 }}>
           <CartesianGrid vertical={false} strokeDasharray="3 3" />
           <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} interval={range === "30d" ? 4 : 0} />
           <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCurrency(v, currency, locale)} width={80} />

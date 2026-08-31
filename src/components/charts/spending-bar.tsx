@@ -16,10 +16,10 @@ export function SpendingBar({ data, currency, locale }: Props) {
   }
   return (
     <ChartContainer config={{ value: { label: "Spent", color: "var(--chart-1)" } }} className="h-64 w-full">
-      <BarChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
+      <BarChart data={data} margin={{ left: 8, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} interval={data.length > 14 ? 3 : 0} />
-        <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCurrency(v, currency, locale)} width={isMobile ? 56 : 80} />
+        <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11 }} tickFormatter={(v: number) => formatCurrency(v, currency, locale)} width={isMobile ? 78 : 88} />
         <ChartTooltip
           cursor={{ fill: "var(--muted)", opacity: 0.2 }}
           content={<ChartTooltipContent formatter={(value: any) => formatCurrency(Number(value), currency, locale)} />}
