@@ -5,8 +5,20 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency, convertCurrency } from "@/lib/format/currency";
 import { getRates } from "@/lib/currency/rates";
 import { formatDate } from "@/lib/format/date";
+import { SpendingBar } from "@/components/charts/spending-bar";
+import { IncomeExpenseArea } from "@/components/charts/income-expense-area";
+import { CategoryDonut } from "@/components/charts/category-donut";
+import { BudgetRadial } from "@/components/charts/budget-radial";
+import { getSpendingChartData, getIncomeExpenseTrend, getCategoryBreakdown, getBudgetUtilization } from "@/lib/charts/aggregate";
+import Link from "next/link";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
+  const params = await searchParams;
+  const range = (params.range === "30d" || params.range === "12m" ? params.range : "7d") as "7d" | "30d" | "12m";
   const { authUser, dbUser } = await getCurrentUser();
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -19,7 +31,7 @@ export default async function DashboardPage() {
   const toPreferred = (amount: number, from: string) =>
     convertCurrency(amount, (from as never) ?? preferredCurrency, preferredCurrency, rates as never);
 
-  const [allExpenses, monthlyExpensesRaw, budgets, recentExpenses, monthlyExpenseItems] = await Promise.all([
+  const [allExpenses, monthlyExpensesRaw, budgets, recentExpenses, spendingData, trendData, categoryData, budgetUtil] = await Promise.all([
     prisma.expense.findMany({ where: { userId: dbUser.id }, select: { amount: true, currency: true, type: true } }),
     prisma.expense.findMany({
       where: { userId: dbUser.id, expenseDate: { gte: monthStart, lte: monthEnd } },
@@ -35,10 +47,10 @@ export default async function DashboardPage() {
       include: { category: { select: { name: true, icon: true } } },
       orderBy: [{ expenseDate: "desc" }, { createdAt: "desc" }],
     }),
-    prisma.expense.findMany({
-      where: { userId: dbUser.id, type: "EXPENSE", expenseDate: { gte: monthStart, lte: monthEnd } },
-      select: { amount: true, currency: true, expenseDate: true },
-    }),
+    getSpendingChartData(dbUser.id, preferredCurrency, range),
+    getIncomeExpenseTrend(dbUser.id, preferredCurrency),
+    getCategoryBreakdown(dbUser.id, preferredCurrency, range === "12m" ? "12m" : "30d"),
+    getBudgetUtilization(dbUser.id, preferredCurrency),
   ]);
 
   const sumConverted = (items: { amount: unknown; currency: unknown; type?: string }[], type?: "EXPENSE" | "INCOME") =>
@@ -55,15 +67,6 @@ export default async function DashboardPage() {
     0,
   );
   const budgetUsed = budgetTotal ? Math.min((monthlyExpense / budgetTotal) * 100, 100) : 0;
-
-  const dailySpending = Array.from({ length: 7 }, (_, offset) => {
-    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6 + offset);
-    const value = monthlyExpenseItems
-      .filter((e) => e.expenseDate.toDateString() === date.toDateString())
-      .reduce((sum, e) => sum + toPreferred(Number(e.amount), String(e.currency ?? preferredCurrency)), 0);
-    return { label: formatDate(date, locale, { weekday: "short" }), value };
-  });
-  const peak = Math.max(...dailySpending.map((point) => point.value), 1);
 
   const fmt = (v: number) => formatCurrency(v, preferredCurrency, locale);
 
@@ -88,15 +91,19 @@ export default async function DashboardPage() {
         </section>
         <section className="grid gap-4 lg:grid-cols-7">
           <div className="rounded-xl border bg-card p-6 lg:col-span-4">
-            <h2 className="font-semibold">Spending overview</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Your expenses for the last seven days.</p>
-            <div className="mt-8 flex h-48 items-end gap-3">
-              {dailySpending.map((point) => (
-                <div key={point.label} className="flex flex-1 flex-col items-center gap-2">
-                  <div title={fmt(point.value)} className="w-full rounded-t bg-primary/80" style={{ height: `${Math.max((point.value / peak) * 100, 3)}%` }} />
-                  <span className="text-xs text-muted-foreground">{point.label}</span>
-                </div>
-              ))}
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold">Spending overview</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Your expenses for the last {range === "12m" ? "12 months" : range === "30d" ? "30 days" : "seven days"}.</p>
+              </div>
+              <div className="flex gap-1">
+                {(["7d", "30d", "12m"] as const).map((r) => (
+                  <Link key={r} href={`/dashboard?range=${r}`} className={r === range ? "rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground" : "rounded-md border px-2.5 py-1 text-xs"}>{r}</Link>
+                ))}
+              </div>
+            </div>
+            <div className="mt-6">
+              <SpendingBar data={spendingData} currency={preferredCurrency} locale={locale} />
             </div>
           </div>
           <div className="rounded-xl border bg-card p-6 lg:col-span-3">
@@ -122,6 +129,36 @@ export default async function DashboardPage() {
                 ))
               )}
             </div>
+          </div>
+        </section>
+        <section className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-xl border bg-card p-6">
+            <h2 className="font-semibold">Income vs Expense (12 months)</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Monthly flow in {preferredCurrency}.</p>
+            <div className="mt-4">
+              <IncomeExpenseArea data={trendData} currency={preferredCurrency} locale={locale} />
+            </div>
+          </div>
+          <div className="rounded-xl border bg-card p-6">
+            <h2 className="font-semibold">Spending by category</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Top categories for {range === "12m" ? "12 months" : "30 days"}.</p>
+            <div className="mt-4">
+              <CategoryDonut data={categoryData} currency={preferredCurrency} locale={locale} />
+            </div>
+            {categoryData.length > 0 && (
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                {categoryData.map((c) => (
+                  <div key={c.name} className="flex items-center gap-2"><span className="size-2 rounded-full" style={{ background: c.fill }} />{c.icon} {c.name} · {fmt(c.value)}</div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+        <section className="rounded-xl border bg-card p-6">
+          <h2 className="font-semibold">Budget utilization</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Active budgets — spent vs budget.</p>
+          <div className="mt-4">
+            <BudgetRadial data={budgetUtil} currency={preferredCurrency} locale={locale} />
           </div>
         </section>
       </main>

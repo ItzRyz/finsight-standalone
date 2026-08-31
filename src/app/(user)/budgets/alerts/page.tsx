@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { formatCurrency } from "@/lib/format/currency";
 import { formatDateTime } from "@/lib/format/date";
 import { UserHeader } from "@/components/user/user-header";
+import { AlertsTimeline } from "@/components/charts/alerts-timeline";
 
 export default async function BudgetAlertsPage({ searchParams }: { searchParams: Promise<{ type?: string; resolved?: string }> }) {
   const params = await searchParams;
@@ -10,6 +11,11 @@ export default async function BudgetAlertsPage({ searchParams }: { searchParams:
   const resolved = params.resolved === "active" || params.resolved === "resolved" ? (params.resolved as "active" | "resolved") : "all";
   const [alerts, { dbUser }] = await Promise.all([getBudgetAlerts({ type, resolved }), getCurrentUser()]);
   const locale = (dbUser.locale as string) ?? "id";
+
+  const timeline = alerts
+    .slice(0, 20)
+    .reverse()
+    .map((a) => ({ label: new Date(a.createdAt).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { month: "short", day: "numeric" }), percentage: Number(a.percentage) }));
 
   return (
     <>
@@ -19,6 +25,15 @@ export default async function BudgetAlertsPage({ searchParams }: { searchParams:
           <h1 className="text-2xl font-bold tracking-tight">Budget Alerts History</h1>
           <p className="text-sm text-muted-foreground">{alerts.length} alerts • type={type ?? "all"} resolved={resolved}</p>
         </div>
+        {alerts.length > 1 && (
+          <section className="rounded-xl border bg-card p-6">
+            <h2 className="font-semibold">Alert trend</h2>
+            <p className="text-sm text-muted-foreground">% of budget used at alert time.</p>
+            <div className="mt-4">
+              <AlertsTimeline data={timeline} />
+            </div>
+          </section>
+        )}
         <div className="overflow-x-auto rounded-xl border bg-card">
           <table className="w-full text-sm">
             <thead className="border-b text-left text-muted-foreground">

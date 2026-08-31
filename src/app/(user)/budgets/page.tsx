@@ -6,6 +6,7 @@ import { convertCurrency, formatCurrency } from "@/lib/format/currency";
 
 import { AddBudgetDialog } from "@/components/budgets/add-budget-dialog";
 import { BudgetList } from "@/components/budgets/budget-list";
+import { BudgetVsSpent } from "@/components/charts/budget-vs-spent";
 import { UserHeader } from "@/components/user/user-header";
 
 export default async function BudgetsPage() {
@@ -40,6 +41,12 @@ export default async function BudgetsPage() {
       .join(" + ");
   })();
 
+  const vsData = budgets.slice(0, 8).map((b) => ({
+    name: (b.name ?? b.category?.name ?? "General").slice(0, 14),
+    spent: toPreferred(b.spent, String((b as unknown as { currency: string }).currency ?? preferredCurrency)),
+    budget: toPreferred(Number(b.amount), String((b as unknown as { currency: string }).currency ?? preferredCurrency)),
+  }));
+
   return (
     <>
       <UserHeader title="Budgets" />
@@ -65,6 +72,14 @@ export default async function BudgetsPage() {
           <SummaryCard label="Total budget" value={fmt(totalBudget)} sub={breakdown} />
           <SummaryCard label="Total spent" value={fmt(totalSpent)} />
           <SummaryCard label="Remaining" value={fmt(totalRemaining)} />
+        </section>
+
+        <section className="rounded-xl border bg-card p-6">
+          <h2 className="font-semibold">Budget vs Spent</h2>
+          <p className="text-sm text-muted-foreground">Top budgets — values converted to {preferredCurrency}.</p>
+          <div className="mt-4">
+            <BudgetVsSpent data={vsData} currency={preferredCurrency} locale={locale} />
+          </div>
         </section>
 
         {/* Budget List */}
