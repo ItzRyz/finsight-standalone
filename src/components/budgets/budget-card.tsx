@@ -119,6 +119,7 @@ export function BudgetCard({ budget, categories }: Props) {
         warningThreshold={Number(budget.warningThreshold)}
         categoryId={budget.category?.id ?? null}
         period={budget.period}
+        currency={currency}
         categories={categories}
       />
     </div>

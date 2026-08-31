@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
+import { formatDate } from "@/lib/format/date";
 
 export default async function AdminPage() {
   await requireAdmin();
@@ -13,7 +14,7 @@ export default async function AdminPage() {
     prisma.notification.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true, isRead: true } }),
   ]);
   const day = (date: Date) => date.toISOString().slice(0, 10);
-  const makeTrend = <T extends { createdAt: Date },>(items: T[], value: (item: T) => number) => Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - 6 + index); const key = day(date); return { label: date.toLocaleDateString("id-ID", { weekday: "short" }), value: items.filter((item) => day(item.createdAt) === key).reduce((sum, item) => sum + value(item), 0) }; });
+  const makeTrend = <T extends { createdAt: Date },>(items: T[], value: (item: T) => number) => Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - 6 + index); const key = day(date); return { label: formatDate(date, "id", { weekday: "short" }), value: items.filter((item) => day(item.createdAt) === key).reduce((sum, item) => sum + value(item), 0) }; });
   const expensePoints = makeTrend(expenseTrend, (item) => item.type === "EXPENSE" ? Number(item.amount) : 0);
   const notificationPoints = makeTrend(notificationTrend, () => 1);
   const maxExpense = Math.max(...expensePoints.map((point) => point.value), 1); const maxNotification = Math.max(...notificationPoints.map((point) => point.value), 1);

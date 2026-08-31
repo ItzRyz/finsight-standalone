@@ -1,11 +1,15 @@
 import { getBudgetAlerts } from "@/actions/budget-alerts";
+import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { formatCurrency } from "@/lib/format/currency";
+import { formatDateTime } from "@/lib/format/date";
 import { UserHeader } from "@/components/user/user-header";
 
 export default async function BudgetAlertsPage({ searchParams }: { searchParams: Promise<{ type?: string; resolved?: string }> }) {
   const params = await searchParams;
   const type = params.type === "WARNING" || params.type === "EXCEEDED" ? (params.type as "WARNING" | "EXCEEDED") : undefined;
   const resolved = params.resolved === "active" || params.resolved === "resolved" ? (params.resolved as "active" | "resolved") : "all";
-  const alerts = await getBudgetAlerts({ type, resolved });
+  const [alerts, { dbUser }] = await Promise.all([getBudgetAlerts({ type, resolved }), getCurrentUser()]);
+  const locale = (dbUser.locale as string) ?? "id";
 
   return (
     <>
@@ -35,23 +39,26 @@ export default async function BudgetAlertsPage({ searchParams }: { searchParams:
                   </td>
                 </tr>
               ) : (
-                alerts.map((a) => (
-                  <tr key={a.id} className="border-b last:border-0">
-                    <td className="p-3">
-                      {a.budget.name ?? a.budget.category?.name ?? "Budget"} <span className="text-xs text-muted-foreground">{a.budget.category?.icon}</span>
-                    </td>
-                    <td className="p-3">
-                      <span className={a.type === "EXCEEDED" ? "font-semibold text-destructive" : "font-medium text-amber-600"}>{a.type}</span>
-                      {a.resolvedAt ? <span className="ml-2 text-xs text-muted-foreground">(resolved)</span> : <span className="ml-2 text-xs text-primary">active</span>}
-                    </td>
-                    <td className="p-3">
-                      {Number(a.spentAmount).toLocaleString("id-ID")} / {Number(a.budgetAmount).toLocaleString("id-ID")}
-                    </td>
-                    <td className="p-3">{Number(a.percentage).toFixed(1)}%</td>
-                    <td className="p-3 max-w-xs truncate">{a.message}</td>
-                    <td className="p-3 text-xs text-muted-foreground">{new Date(a.createdAt).toLocaleString("id-ID")}</td>
-                  </tr>
-                ))
+                alerts.map((a) => {
+                  const cur = (a.budget as unknown as { currency: string }).currency ?? "IDR";
+                  return (
+                    <tr key={a.id} className="border-b last:border-0">
+                      <td className="p-3">
+                        {a.budget.name ?? a.budget.category?.name ?? "Budget"} <span className="text-xs text-muted-foreground">{a.budget.category?.icon}</span>
+                      </td>
+                      <td className="p-3">
+                        <span className={a.type === "EXCEEDED" ? "font-semibold text-destructive" : "font-medium text-amber-600"}>{a.type}</span>
+                        {a.resolvedAt ? <span className="ml-2 text-xs text-muted-foreground">(resolved)</span> : <span className="ml-2 text-xs text-primary">active</span>}
+                      </td>
+                      <td className="p-3">
+                        {formatCurrency(Number(a.spentAmount), cur as never, locale)} / {formatCurrency(Number(a.budgetAmount), cur as never, locale)}
+                      </td>
+                      <td className="p-3">{Number(a.percentage).toFixed(1)}%</td>
+                      <td className="p-3 max-w-xs truncate">{a.message}</td>
+                      <td className="p-3 text-xs text-muted-foreground">{formatDateTime(a.createdAt, locale)}</td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

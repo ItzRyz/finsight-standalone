@@ -51,6 +51,7 @@ type Props = {
   warningThreshold: number;
   categoryId: string | null;
   period: "MONTHLY" | "YEARLY";
+  currency?: string | null;
   categories: Category[];
 };
 
@@ -61,6 +62,7 @@ export function BudgetActions({
   warningThreshold,
   categoryId,
   period,
+  currency,
   categories,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -74,6 +76,7 @@ export function BudgetActions({
     categoryId: categoryId ?? "",
     period,
     warningThreshold: String(warningThreshold),
+    currency: (currency as string) ?? "IDR",
   });
 
   function resetForm() {
@@ -83,6 +86,7 @@ export function BudgetActions({
       categoryId: categoryId ?? "",
       period,
       warningThreshold: String(warningThreshold),
+      currency: (currency as string) ?? "IDR",
     });
     setError(null);
   }
@@ -273,6 +277,31 @@ export function BudgetActions({
                 />
                 <span className="text-sm text-muted-foreground">%</span>
               </div>
+            </Field>
+
+            <Field>
+              <FieldLabel>Currency</FieldLabel>
+              <Select
+                value={form.currency}
+                onValueChange={(value) =>
+                  setForm((current) => ({
+                    ...current,
+                    currency: value,
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="IDR">IDR — Rupiah</SelectItem>
+                  <SelectItem value="USD">USD — Dollar</SelectItem>
+                  <SelectItem value="EUR">EUR — Euro</SelectItem>
+                  <SelectItem value="JPY">JPY — Yen</SelectItem>
+                  <SelectItem value="SGD">SGD — Dollar</SelectItem>
+                </SelectContent>
+              </Select>
+              <input type="hidden" name="currency" value={form.currency} />
             </Field>
 
             {error && (

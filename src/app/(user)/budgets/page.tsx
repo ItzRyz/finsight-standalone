@@ -1,15 +1,44 @@
 import { getBudgets } from "@/actions/budgets";
 import { getAvailableCategories } from "@/lib/data/categories";
+import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { getRates } from "@/lib/currency/rates";
+import { convertCurrency, formatCurrency } from "@/lib/format/currency";
 
 import { AddBudgetDialog } from "@/components/budgets/add-budget-dialog";
 import { BudgetList } from "@/components/budgets/budget-list";
 import { UserHeader } from "@/components/user/user-header";
 
 export default async function BudgetsPage() {
-  const [budgets, categories] = await Promise.all([
+  const [{ dbUser }, budgets, categories] = await Promise.all([
+    getCurrentUser(),
     getBudgets(),
     getAvailableCategories(),
   ]);
+
+  const preferredCurrency = (dbUser.currency as "IDR" | "USD" | "EUR" | "JPY" | "SGD") ?? "IDR";
+  const locale = (dbUser.locale as string) ?? "id";
+  const rates = await getRates(preferredCurrency);
+
+  const toPreferred = (amount: number, cur: string) =>
+    convertCurrency(amount, (cur as never) ?? preferredCurrency, preferredCurrency, rates as never);
+
+  const totalBudget = budgets.reduce((sum, b) => sum + toPreferred(Number(b.amount), String((b as unknown as { currency: string }).currency ?? preferredCurrency)), 0);
+  const totalSpent = budgets.reduce((sum, b) => sum + toPreferred(b.spent, String((b as unknown as { currency: string }).currency ?? preferredCurrency)), 0);
+  const totalRemaining = budgets.reduce((sum, b) => sum + toPreferred(b.remaining, String((b as unknown as { currency: string }).currency ?? preferredCurrency)), 0);
+  const fmt = (v: number) => formatCurrency(v, preferredCurrency, locale);
+
+  // If budgets are mixed currencies, also build per-currency breakdown for accessibility title
+  const breakdown = (() => {
+    const m = new Map<string, number>();
+    budgets.forEach((b) => {
+      const cur = String((b as unknown as { currency: string }).currency ?? preferredCurrency);
+      m.set(cur, (m.get(cur) ?? 0) + Number(b.amount));
+    });
+    if (m.size <= 1) return null;
+    return Array.from(m.entries())
+      .map(([cur, amt]) => formatCurrency(amt, cur as never, locale))
+      .join(" + ");
+  })();
 
   return (
     <>
@@ -33,27 +62,9 @@ export default async function BudgetsPage() {
           className="grid gap-4 sm:grid-cols-3"
           aria-label="Budget summary"
         >
-          <SummaryCard
-            label="Total budget"
-            value={formatIDR(
-              budgets.reduce(
-                (total, budget) => total + Number(budget.amount),
-                0,
-              ),
-            )}
-          />
-          <SummaryCard
-            label="Total spent"
-            value={formatIDR(
-              budgets.reduce((total, budget) => total + budget.spent, 0),
-            )}
-          />
-          <SummaryCard
-            label="Remaining"
-            value={formatIDR(
-              budgets.reduce((total, budget) => total + budget.remaining, 0),
-            )}
-          />
+          <SummaryCard label="Total budget" value={fmt(totalBudget)} sub={breakdown} />
+          <SummaryCard label="Total spent" value={fmt(totalSpent)} />
+          <SummaryCard label="Remaining" value={fmt(totalRemaining)} />
         </section>
 
         {/* Budget List */}
@@ -64,19 +75,12 @@ export default async function BudgetsPage() {
   );
 }
 
-function SummaryCard({ label, value }: { label: string; value: string }) {
+function SummaryCard({ label, value, sub }: { label: string; value: string; sub?: string | null }) {
   return (
     <div className="rounded-xl border bg-card p-4 shadow-sm">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-xl font-bold tracking-tight">{value}</p>
+      {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
-}
-
-function formatIDR(value: number) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(value);
 }

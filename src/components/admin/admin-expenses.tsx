@@ -14,6 +14,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { formatCurrency } from "@/lib/format/currency";
+import { formatDate } from "@/lib/format/date";
 
 type Expense = {
   id: string;
@@ -21,6 +23,7 @@ type Expense = {
   amount: number;
   type: "EXPENSE" | "INCOME";
   expenseDate: Date;
+  currency?: string | null;
   user: { email: string; name: string | null };
   category: { name: string; icon: string | null } | null;
 };
@@ -51,12 +54,10 @@ export function AdminExpenses({ expenses }: { expenses: Expense[] }) {
                 <p className="text-xs text-muted-foreground">{expense.category?.name ?? "Uncategorized"}</p>
               </td>
               <td className="p-3">{expense.user.email}</td>
-              <td className="p-3">{new Date(expense.expenseDate).toLocaleDateString("id-ID")}</td>
+              <td className="p-3">{formatDate(expense.expenseDate, "id")}</td>
               <td className={expense.type === "INCOME" ? "p-3 font-medium text-emerald-600" : "p-3 font-medium"}>
                 {expense.type === "INCOME" ? "+" : "-"}
-                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(
-                  expense.amount,
-                )}
+                {formatCurrency(expense.amount, ((expense.currency as never) ?? "IDR"), "id")}
               </td>
               <td className="p-3 text-right">
                 <AlertDialog>

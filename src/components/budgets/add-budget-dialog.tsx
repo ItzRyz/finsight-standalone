@@ -9,6 +9,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { budgetSchema, type BudgetInput } from "@/lib/validators/budget";
+import { useLocaleStore } from "@/stores/locale-store";
 
 import { createBudget } from "@/actions/budgets";
 
@@ -42,6 +43,7 @@ type Category = {
 
 export function AddBudgetDialog({ categories }: { categories: Category[] }) {
   const [open, setOpen] = useState(false);
+  const preferredCurrency = useLocaleStore((s) => s.currency);
 
   const {
     control,
@@ -58,6 +60,7 @@ export function AddBudgetDialog({ categories }: { categories: Category[] }) {
       categoryId: "",
       period: "MONTHLY",
       warningThreshold: 80,
+      currency: preferredCurrency,
     },
   });
 
@@ -73,6 +76,7 @@ export function AddBudgetDialog({ categories }: { categories: Category[] }) {
     formData.set("period", values.period);
 
     formData.set("warningThreshold", String(values.warningThreshold));
+    formData.set("currency", (values.currency as string) ?? preferredCurrency);
 
     const result = await createBudget(formData);
 
@@ -245,6 +249,31 @@ export function AddBudgetDialog({ categories }: { categories: Category[] }) {
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
+              </Field>
+            )}
+          />
+
+          {/* Currency */}
+
+          <Controller
+            name="currency"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Currency</FieldLabel>
+                <Select value={field.value as string} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="IDR">IDR — Rupiah</SelectItem>
+                    <SelectItem value="USD">USD — Dollar</SelectItem>
+                    <SelectItem value="EUR">EUR — Euro</SelectItem>
+                    <SelectItem value="JPY">JPY — Yen</SelectItem>
+                    <SelectItem value="SGD">SGD — Dollar</SelectItem>
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
             )}
           />

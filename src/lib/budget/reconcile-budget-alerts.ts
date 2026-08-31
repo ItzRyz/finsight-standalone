@@ -22,10 +22,12 @@ export async function reconcileBudgetAlerts(userId: string) {
   const results = [];
 
   for (const budget of budgets) {
+    const budgetCurrency = (budget as unknown as { currency: string }).currency ?? "IDR";
     const aggregate = await prisma.expense.aggregate({
       where: {
         userId,
         type: "EXPENSE",
+        currency: budgetCurrency as never,
 
         expenseDate: {
           gte: budget.periodStart,

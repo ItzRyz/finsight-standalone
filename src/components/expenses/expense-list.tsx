@@ -45,6 +45,7 @@ export function ExpenseList({ expenses, categories }: ExpenseListProps) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState<"ALL" | "EXPENSE" | "INCOME">("ALL");
   const [categoryId, setCategoryId] = useState("ALL");
+  const [currencyFilter, setCurrencyFilter] = useState("ALL");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [page, setPage] = useState(1);
@@ -55,14 +56,15 @@ export function ExpenseList({ expenses, categories }: ExpenseListProps) {
       (expense) =>
         (type === "ALL" || expense.type === type) &&
         (categoryId === "ALL" || expense.categoryId === categoryId) &&
+        (currencyFilter === "ALL" || (expense.currency ?? pref) === currencyFilter) &&
         (!fromDate || new Date(expense.expenseDate) >= new Date(`${fromDate}T00:00:00`)) &&
         (!toDate || new Date(expense.expenseDate) <= new Date(`${toDate}T23:59:59.999`)) &&
         (!normalized ||
-          [expense.title, expense.description, expense.merchant, expense.category?.name]
+          [expense.title, expense.description, expense.merchant, expense.category?.name, expense.currency]
             .filter(Boolean)
             .some((value) => value!.toLowerCase().includes(normalized))),
     );
-  }, [expenses, query, type, categoryId, fromDate, toDate]);
+  }, [expenses, query, type, categoryId, currencyFilter, fromDate, toDate, pref]);
 
   const csvRows: ExpenseCsvRow[] = useMemo(
     () =>
@@ -77,8 +79,9 @@ export function ExpenseList({ expenses, categories }: ExpenseListProps) {
         location: e.location,
         description: e.description,
         receiptUrl: e.receiptUrl,
+        currency: (e.currency as string) ?? pref,
       })),
-    [filteredExpenses],
+    [filteredExpenses, pref],
   );
 
   const pageSize = 10;
@@ -138,6 +141,22 @@ export function ExpenseList({ expenses, categories }: ExpenseListProps) {
               {category.name}
             </option>
           ))}
+        </select>
+        <select
+          value={currencyFilter}
+          onChange={(event) => {
+            setCurrencyFilter(event.target.value);
+            setPage(1);
+          }}
+          className="h-8 rounded-lg border bg-card px-2 text-sm"
+          aria-label="Filter by currency"
+        >
+          <option value="ALL">All currencies</option>
+          <option value="IDR">IDR</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="JPY">JPY</option>
+          <option value="SGD">SGD</option>
         </select>
         <Input
           type="date"

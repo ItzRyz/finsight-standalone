@@ -21,18 +21,23 @@ type Expense = {
   merchant: string | null;
   location: string | null;
   receiptUrl: string | null;
+  currency?: string | null;
 };
+
+const CURRENCIES = ["IDR", "USD", "EUR", "JPY", "SGD"] as const;
 
 export function EditExpenseDialog({ expense, categories }: { expense: Expense; categories: Category[] }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [type, setType] = useState(expense.type);
   const [categoryId, setCategoryId] = useState(expense.categoryId ?? "");
+  const [currency, setCurrency] = useState<string>((expense.currency as string) ?? "IDR");
 
   async function submit(formData: FormData) {
     // Sync controlled selects into formData
     formData.set("type", type);
     formData.set("categoryId", categoryId);
+    formData.set("currency", currency);
     const result = await updateExpense(expense.id, formData);
     if (!result.success) {
       setError(result.error ?? result.fieldErrors?.title ?? "Unable to update transaction.");
@@ -59,7 +64,7 @@ export function EditExpenseDialog({ expense, categories }: { expense: Expense; c
             <Input id={`edit-title-${expense.id}`} name="title" defaultValue={expense.title} required />
           </div>
           <div className="space-y-1">
-            <Label htmlFor={`edit-amount-${expense.id}`}>Amount (IDR)</Label>
+            <Label htmlFor={`edit-amount-${expense.id}`}>Amount ({currency})</Label>
             <Input
               id={`edit-amount-${expense.id}`}
               name="amount"
@@ -69,6 +74,22 @@ export function EditExpenseDialog({ expense, categories }: { expense: Expense; c
               defaultValue={Number(expense.amount)}
               required
             />
+          </div>
+          <div className="space-y-1">
+            <Label>Currency</Label>
+            <Select value={currency} onValueChange={setCurrency}>
+              <SelectTrigger aria-label="Currency">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCIES.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="currency" value={currency} />
           </div>
           <div className="space-y-1">
             <Label>Type</Label>

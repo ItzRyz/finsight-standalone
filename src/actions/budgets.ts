@@ -372,7 +372,7 @@ export async function updateBudget(
         period,
         periodStart: start,
         periodEnd: end,
-        currency: currency ?? "IDR",
+        currency: currency ?? dbUser.currency ?? "IDR",
         isActive: true,
         NOT: {
           id: existingBudget.id,
@@ -402,7 +402,7 @@ export async function updateBudget(
         name: name || null,
         categoryId: validCategoryId,
         amount: validated.data.amount,
-        currency: currency ?? "IDR",
+        currency: currency ?? dbUser.currency ?? "IDR",
         period,
         periodStart: start,
         periodEnd: end,

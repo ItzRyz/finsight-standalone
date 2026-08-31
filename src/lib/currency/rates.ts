@@ -53,8 +53,17 @@ export async function getRates(base: Currency = "IDR"): Promise<Record<Currency,
       currencies.forEach((to) => {
         if (from === to) result[from][to] = 1;
         else if (from === base && fetched[to]) result[from][to] = fetched[to]!;
-        else if (result[from]?.[base] && result[base]?.[to]) {
-          // via base
+        else if (from !== base && to === base && fetched[from]) {
+          // inverse: from -> base via 1 / (base -> from)
+          const baseToFrom = fetched[from];
+          if (baseToFrom && baseToFrom !== 0) result[from][to] = 1 / baseToFrom;
+        } else if (from !== base && to !== base && fetched[from] && fetched[to]) {
+          // via base: from -> base -> to
+          const baseToFrom = fetched[from];
+          const baseToTo = fetched[to];
+          if (baseToFrom && baseToFrom !== 0 && baseToTo) result[from][to] = baseToTo / baseToFrom;
+        } else if (result[from]?.[base] && result[base]?.[to]) {
+          result[from][to] = result[from][base]! * result[base][to]!;
         }
       });
     });
