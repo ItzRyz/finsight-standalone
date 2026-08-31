@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  TrendingUp,
   WalletCards,
   Bell,
   Tags,
@@ -24,6 +23,18 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      { "@type": "Question", name: "Is my data private?", acceptedAnswer: { "@type": "Answer", text: "Yes — Supabase RLS, per-user isolation." } },
+      { "@type": "Question", name: "How does multicurrency work?", acceptedAnswer: { "@type": "Answer", text: "Live rates via exchangerate-api with fallback." } },
+      { "@type": "Question", name: "What if AI is offline?", acceptedAnswer: { "@type": "Answer", text: "Saved as uncategorized FAILED, retry from Review." } },
+      { "@type": "Question", name: "Can I export?", acceptedAnswer: { "@type": "Answer", text: "CSV export includes Currency column and per-currency totals." } },
+      { "@type": "Question", name: "Do I need to install anything?", acceptedAnswer: { "@type": "Answer", text: "No — PWA ready, offline queue." } },
+    ],
+  };
+
   // Stats — public, best effort
   let stats = { users: 0, expenses: 0, budgets: 0, categories: 0 };
   try {
@@ -40,12 +51,12 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-svh flex-col bg-background font-sans">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       {/* Header */}
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-card/80 px-6 backdrop-blur">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <TrendingUp className="size-4" />
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="FinSight logo" width={32} height={32} className="size-8 rounded-lg" />
           <span className="text-lg font-bold tracking-tight">FinSight</span>
           <span className="hidden text-xs text-muted-foreground sm:inline">Financial command center</span>
         </Link>

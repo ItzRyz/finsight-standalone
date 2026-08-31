@@ -1,24 +1,20 @@
 {
     "name": "FinSight",
     "short_name": "FinSight",
-    "description": "AI-powered financial solution — track expenses, budgets, and real-time alerts.",
+    "description": "AI-powered multicurrency expense tracker — IDR, USD, EUR, JPY, SGD with AI categorization, budgets & charts.",
     "icons": [
-        {
-            "src": "/favicon.ico",
-            "sizes": "48x48",
-            "type": "image/x-icon"
-        },
-        {
-            "src": "/file.svg",
-            "sizes": "any",
-            "type": "image/svg+xml",
-            "purpose": "any"
-        }
+        { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" },
+        { "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+        { "src": "/icon", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+        { "src": "/apple-icon", "sizes": "180x180", "type": "image/png", "purpose": "any" }
     ],
     "theme_color": "#ffc400",
-    "background_color": "#eef0f3",
-    "start_url": "/dashboard",
+    "background_color": "#ffffff",
+    "start_url": "/",
     "display": "standalone",
     "orientation": "portrait",
-    "categories": ["finance", "productivity"]
+    "categories": ["finance", "productivity"],
+    "screenshots": [
+        { "src": "/opengraph-image", "sizes": "1200x630", "type": "image/png", "form_factor": "wide" }
+    ]
 }

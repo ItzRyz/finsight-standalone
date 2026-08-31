@@ -1,9 +1,14 @@
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { UserSidebar } from "@/components/user/user-sidebar";
 import { getNotifications } from "@/actions/notifications";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { NotificationProvider } from "@/components/providers/notification-provider";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+};
 
 export default async function AppLayout({
   children,

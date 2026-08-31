@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 
 import {
   Bell,
-  ChartNoAxesCombined,
   LayoutDashboard,
   Receipt,
   Tags,
@@ -87,9 +86,8 @@ export function UserSidebar({ user }: UserSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="FinSight">
               <Link href="/dashboard">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <ChartNoAxesCombined className="size-4" />
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.svg" alt="FinSight" width={32} height={32} className="size-8 rounded-lg" />
 
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-bold">FinSight</span>
