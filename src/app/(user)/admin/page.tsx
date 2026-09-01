@@ -17,7 +17,7 @@ export default async function AdminPage() {
   ]);
   const day = (date: Date) => date.toISOString().slice(0, 10);
   const makeTrend = <T extends { createdAt: Date },>(items: T[], value: (item: T) => number) => Array.from({ length: 7 }, (_, index) => { const date = new Date(); date.setDate(date.getDate() - 6 + index); const key = day(date); return { label: formatDate(date, "id", { weekday: "short" }), value: items.filter((item) => day(item.createdAt) === key).reduce((sum, item) => sum + value(item), 0) }; });
-  const expensePoints = makeTrend(expenseTrend, (item) => item.type === "EXPENSE" ? Number(item.amount) : 0);
+  const expensePoints = makeTrend(expenseTrend as any, (item: any) => item.type === "EXPENSE" ? Number(item.amount) : 0);
   const notificationPoints = makeTrend(notificationTrend, () => 1);
   const aiCount = (status: "PENDING" | "COMPLETED" | "FAILED") => ai.find((item) => item.status === status)?._count._all ?? 0;
   const links = [["Users", "/admin/users"], ["System categories", "/admin/categories"], ["Expenses", "/admin/expenses"], ["Notifications", "/admin/notifications"], ["AI categorizations", "/admin/ai-categorizations"]];
