@@ -101,7 +101,7 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const locale = (cookieStore.get("NEXT_LOCALE")?.value as "id" | "en") ?? "id";
   const orgJsonLd = {

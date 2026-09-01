@@ -5,7 +5,7 @@ import {
   ExpenseType,
   CategoryType,
   CategorizationSource,
-} from "../src/generated/prisma/client";
+} from "@/generated/prisma/client";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 

@@ -19,7 +19,7 @@ export async function reconcileBudgetAlerts(userId: string) {
     },
   });
 
-  const results = [];
+  const results: any[] = [];
 
   for (const budget of budgets) {
     const budgetCurrency = (budget as unknown as { currency: string }).currency ?? "IDR";
